@@ -120,7 +120,7 @@ export default function LunaParkHeader() {
                         {/* Call to Action Button */}
                         <button
                             onClick={() => router.push(headerData.call_to_action_buttons.button_url.href)}
-                            className="bg-[#aa3030] text-[#f9ebd1] px-6 py-2.5 text-sm rounded-full font-bold transition-colors duration-200"
+                            className="bg-[#aa3030] text-[#f9ebd1] px-6 py-2.5 text-sm rounded-full font-bold transition-colors duration-200 cursor-pointer"
                         >
                             {headerData.call_to_action_buttons.button_url.title}
                         </button>

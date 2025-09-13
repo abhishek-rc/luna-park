@@ -22,10 +22,8 @@ export default function ContentstackExample() {
         }
     };
 
-    console.log(">>>>>>>>.content", content);
-
     useEffect(() => {
-        fetchContent('test');
+        fetchContent('homepage_ticketbooking_navigation_tabs');
     }, []);
 
     if (loading) {

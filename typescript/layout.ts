@@ -211,3 +211,176 @@ export type LunaParkHeaderEntry = {
 export type LunaParkHeaderResponse = {
     entries: LunaParkHeaderEntry[];
 };
+
+// Homepage Types
+export type HomepageEventCard = {
+    event_image: {
+        uid: string;
+        _version: number;
+        parent_uid: string;
+        title: string;
+        created_by: string;
+        updated_by: string;
+        created_at: string;
+        updated_at: string;
+        content_type: string;
+        file_size: string;
+        filename: string;
+        ACL: {};
+        is_dir: boolean;
+        tags: any[];
+        publish_details: {
+            time: string;
+            user: string;
+            environment: string;
+            locale: string;
+        };
+        url: string;
+    };
+    event_heading: string;
+    event_description: string;
+    event_card_cta: {
+        title: string;
+        href: string;
+    };
+    _metadata: {
+        uid: string;
+    };
+};
+
+export type HomepageEventGroup = {
+    event_card: HomepageEventCard[];
+};
+
+export type HomepageHeroSection = {
+    hero_cover: {
+        uid: string;
+        _version: number;
+        parent_uid: string;
+        title: string;
+        created_by: string;
+        updated_by: string;
+        created_at: string;
+        updated_at: string;
+        content_type: string;
+        file_size: string;
+        filename: string;
+        ACL: {};
+        is_dir: boolean;
+        tags: any[];
+        publish_details: {
+            time: string;
+            user: string;
+            environment: string;
+            locale: string;
+        };
+        url: string;
+    };
+    hero_cta: {
+        title: string;
+        href: string;
+    };
+};
+
+export type HomepageMemoryCard = {
+    memory_card_image: {
+        uid: string;
+        _version: number;
+        parent_uid: string;
+        title: string;
+        created_by: string;
+        updated_by: string;
+        created_at: string;
+        updated_at: string;
+        content_type: string;
+        file_size: string;
+        filename: string;
+        ACL: {};
+        is_dir: boolean;
+        tags: any[];
+        publish_details: {
+            time: string;
+            user: string;
+            environment: string;
+            locale: string;
+        };
+        url: string;
+    };
+    memory_card_title: string;
+    _metadata: {
+        uid: string;
+    };
+};
+
+export type HomepageMemoryPartyGroup = {
+    memory_booking_card: HomepageMemoryCard[];
+};
+
+export type HomepageTicketCard = {
+    card_title: string;
+    card_image: {
+        uid: string;
+        _version: number;
+        parent_uid: string;
+        title: string;
+        created_by: string;
+        updated_by: string;
+        created_at: string;
+        updated_at: string;
+        content_type: string;
+        file_size: string;
+        filename: string;
+        ACL: {};
+        is_dir: boolean;
+        tags: any[];
+        publish_details: {
+            time: string;
+            user: string;
+            environment: string;
+            locale: string;
+        };
+        url: string;
+    };
+    card_cta: {
+        title: string;
+        href: string;
+    };
+    _metadata: {
+        uid: string;
+    };
+};
+
+export type HomepageTicketGroup = {
+    tab_id: number;
+    tab_name: string;
+    ticketbooking_cards: HomepageTicketCard[];
+    _metadata: {
+        uid: string;
+    };
+};
+
+export type HomepageEntry = {
+    uid: string;
+    _version: number;
+    locale: string;
+    ACL: {};
+    _in_progress: boolean;
+    created_at: string;
+    created_by: string;
+    event_group: HomepageEventGroup;
+    hero_section: HomepageHeroSection;
+    memory_party_group: HomepageMemoryPartyGroup;
+    tags: any[];
+    ticketbooking_group: HomepageTicketGroup[];
+    title: string;
+    updated_at: string;
+    updated_by: string;
+    publish_details: {
+        time: string;
+        user: string;
+        environment: string;
+        locale: string;
+    };
+};
+
+export type HomepageResponse = HomepageEntry[];
