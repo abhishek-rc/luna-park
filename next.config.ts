@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
     CONTENTSTACK_LIVE_PREVIEW: process.env.CONTENTSTACK_LIVE_PREVIEW || "false",
     CONTENTSTACK_LIVE_EDIT_TAGS: process.env.CONTENTSTACK_LIVE_EDIT_TAGS || "false",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.contentstack.io',
+        port: '',
+        pathname: '/v3/assets/**',
+      },
+    ],
+  },
   experimental: {
     largePageDataBytes: 128 * 100000
   },

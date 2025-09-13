@@ -102,3 +102,112 @@ export type ChilderenProps = {
     props: {};
     type: Function;
 }
+
+// Luna Park Header Types
+export type LunaParkHeaderEntry = {
+    uid: string;
+    _version: number;
+    locale: string;
+    ACL: {};
+    _in_progress: boolean;
+    call_to_action_buttons: {
+        button_url: {
+            title: string;
+            href: string;
+        };
+    };
+    created_at: string;
+    created_by: string;
+    primary_navigation: Array<{
+        navigation_url: {
+            title: string;
+            href: string;
+        };
+        _metadata: {
+            uid: string;
+        };
+        has_dropdown: boolean;
+        dropdown_items: Array<{
+            dropdown_url: {
+                title: string;
+                href: string;
+            };
+            _metadata: {
+                uid: string;
+            };
+        }>;
+    }>;
+    site_logo: {
+        uid: string;
+        _version: number;
+        parent_uid: string;
+        title: string;
+        created_by: string;
+        updated_by: string;
+        created_at: string;
+        updated_at: string;
+        content_type: string;
+        file_size: string;
+        filename: string;
+        ACL: {};
+        is_dir: boolean;
+        tags: any[];
+        publish_details: {
+            time: string;
+            user: string;
+            environment: string;
+            locale: string;
+        };
+        url: string;
+    };
+    tags: any[];
+    title: string;
+    updated_at: string;
+    updated_by: string;
+    user_actions: {
+        show_login: boolean;
+        login_url: {
+            title: string;
+            href: string;
+        };
+        show_signup: boolean;
+        signup_url: {
+            title: string;
+            href: string;
+        };
+        show_cart: boolean;
+        cart_icon: {
+            uid: string;
+            _version: number;
+            parent_uid: string;
+            title: string;
+            created_by: string;
+            updated_by: string;
+            created_at: string;
+            updated_at: string;
+            content_type: string;
+            file_size: string;
+            filename: string;
+            ACL: {};
+            is_dir: boolean;
+            tags: any[];
+            publish_details: {
+                time: string;
+                user: string;
+                environment: string;
+                locale: string;
+            };
+            url: string;
+        };
+    };
+    publish_details: {
+        time: string;
+        user: string;
+        environment: string;
+        locale: string;
+    };
+};
+
+export type LunaParkHeaderResponse = {
+    entries: LunaParkHeaderEntry[];
+};
