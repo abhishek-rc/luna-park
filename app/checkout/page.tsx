@@ -1,39 +1,47 @@
-"use client";
+"use client"
 import { useState, useEffect } from "react";
 import React from "react";
-import { getContentByType } from "../../helper";
+
 import Summary from "./component/summary";
+import CheckoutFooter from "./component/footer";
+import TicketSelection from "./component/ticketSelection";
+import { getContentByType } from "../../helper";
 
 export default function TicketBooking() {
-  const [content, setContent] = useState<any[]>([]);
+
   const [yellowPass, setYellowPass] = useState(0);
   const [redGreenPass, setRedGreenPass] = useState(0);
+    const [logoContent, setLogoContent] = useState<any[]>([]);
 
   const totalTickets = yellowPass + redGreenPass;
   const totalPrice = totalTickets > 0 ? `$${totalTickets * 50}` : "TBC";
-  const [passOpen, setPassOpen] = useState(false);
+ const [passOpen, setPassOpen] = useState<number | null>(null);
 
-  const fetchContent = async (type: string) => {
-    try {
-      const response = await getContentByType(type);
-      setContent(response || []);
-    } catch (err) {
-      console.error("Error fetching content:", err);
-    } finally {
-    }
-  };
-  useEffect(() => {
-    fetchContent("riderpass");
-  }, []);
+    const fetchContent = async (type: string) => {
+     try {
+       const response = await getContentByType(type);
+       setLogoContent(response || []);
+     } catch (err) {
+       console.error("Error fetching content:", err);
+     } finally {
+     }
+   };
+   useEffect(() => {
+     fetchContent("checkoutlogo");
+   }, []);
 
-
+console.log(logoContent,"logoContent")
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 px-10">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-red-600">LUNA PARK</h1>
+     <img
+  src={logoContent?.[0]?.url || "/luna-park-logo.png"}
+  alt="Luna Park Logo"
+  className="h-[80px] w-[150px] "
+/>
         <button className="text-blue-900 font-semibold">LOG IN</button>
       </div>
 
@@ -47,117 +55,7 @@ export default function TicketBooking() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Ticket Selection */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold text-gray-800">
-            SELECT YOUR TICKETS
-          </h2>
-
-          {content.map((item, index) => (
-            <div    key={item?.id || index} className="bg-white rounded-2xl shadow p-6 flex items-center">
-            <img
-              src={item?.url}
-              alt="Unlimited Rides"
-              className="rounded-xl w-[50%] object-cover mr-6"
-            />
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-800">
-                {item?.title.toUpperCase() || "Default Title"}
-              </h3>
-
-              {!passOpen && (
-                <>
-                  {" "}
-                  <hr className="border-t-2 border-dotted border-gray-400 my-4" />
-                  <p className="text-gray-600 mb-4">
-                    {item?.multi_line ||
-                      "Default description about the ticket."}
-                  </p>
-                  <button
-                    className="mt-4 text-red-600 font-semibold text-sm"
-                    onClick={() => setPassOpen(!passOpen)}
-                  >
-                    SELECT
-                  </button>
-                </>
-              )}
-
-              {passOpen && (
-                <div className="mt-4 space-y-4">
-                  {/* Yellow Pass */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">
-                        {item?.select_1_title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {item.select2description}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          setYellowPass(Math.max(0, yellowPass - 1))
-                        }
-                        className="px-3 py-1 border rounded-full"
-                      >
-                        -
-                      </button>
-                      <span>{yellowPass}</span>
-                      <button
-                        onClick={() => setYellowPass(yellowPass + 1)}
-                        className="px-3 py-1 border rounded-full"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Red/Green Pass */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold">
-                        {content[0].select2_title}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {content[0].select2description}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          setRedGreenPass(Math.max(0, redGreenPass - 1))
-                        }
-                        className="px-3 py-1 border rounded-full"
-                      >
-                        -
-                      </button>
-                      <span>{redGreenPass}</span>
-                      <button
-                        onClick={() => setRedGreenPass(redGreenPass + 1)}
-                        className="px-3 py-1 border rounded-full"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  {/* Clear */}
-                  <button
-                    onClick={() => {
-                      setYellowPass(0);
-                      setRedGreenPass(0);
-                      setPassOpen(false);
-                    }}
-                    className="mt-4 text-red-600 font-semibold text-sm"
-                  >
-                    CLEAR
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-          ))}
-        </div>
+       <TicketSelection setPassOpen={setPassOpen}  totalPrice={totalPrice} passOpen={passOpen} setYellowPass={setYellowPass} yellowPass={yellowPass} setRedGreenPass={setRedGreenPass} redGreenPass={redGreenPass} />
         <Summary
           totalTickets={totalTickets}
           yellowPass={yellowPass}
@@ -165,6 +63,7 @@ export default function TicketBooking() {
           totalPrice={totalPrice}
         />
       </div>
+      <CheckoutFooter/>
     </div>
   );
 }

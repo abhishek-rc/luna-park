@@ -41,7 +41,7 @@ const Summary: React.FC<SummaryProps> = ({
           <p className="text-gray-800 font-bold">{totalPrice}</p>
         </div>
 
-        <button className="w-full bg-red-600 text-white py-3 rounded-full font-semibold">
+        <button className="w-full bg-red-600 text-white py-3 rounded-full font-semibold" >
           NEXT
         </button>
       </div>
