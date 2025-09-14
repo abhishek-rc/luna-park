@@ -1,5 +1,6 @@
 import HeroSection from "../components/HeroSection";
 import TicketBookingSection from "../components/TicketBookingSection";
+import EventsSection from "../components/EventsSection";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
       <main>
         <HeroSection />
         <TicketBookingSection />
+        <EventsSection />
       </main>
     </div>
   );
