@@ -19,7 +19,7 @@ export default function LunaParkHeader() {
 
     if (loading) {
         return (
-            <header className="bg-[#2a324a] text-white py-4">
+            <header className="bg-[#2a324a] text-white py-4 sticky top-0 z-50">
                 <div className="container mx-auto px-4">
                     <div className="animate-pulse flex items-center justify-between">
                         <div className="h-8 bg-[#2a324a]  rounded w-32"></div>
@@ -35,7 +35,7 @@ export default function LunaParkHeader() {
 
     if (error || !headerData) {
         return (
-            <header className="bg-blue-900 text-white py-4">
+            <header className="bg-blue-900 text-white py-4 sticky top-0 z-50">
                 <div className="container mx-auto px-4">
                     <div className="text-center">
                         <p className="text-red-300">Error loading header</p>
@@ -46,49 +46,49 @@ export default function LunaParkHeader() {
     }
 
     return (
-        <header className="bg-[#2a324a] text-white relative z-50">
+        <header className="bg-[#2a324a] text-white sticky top-0 z-50">
             <div className="container mx-auto px-20">
                 <div className="flex items-center justify-between py-3">
                     {/* Primary Navigation */}
                     <nav className="hidden md:flex items-center space-x-6">
                         <Image
-                            src={headerData.site_logo.url}
-                            alt={headerData.site_logo.title}
+                            src={headerData?.site_logo?.url || '/'}
+                            alt={headerData?.site_logo?.title || 'Logo'}
                             width={120}
                             height={40}
                             className="h-8 w-auto cursor-pointer"
                         />
-                        {headerData.primary_navigation.map((navItem) => (
+                        {headerData?.primary_navigation?.map((navItem) => (
                             <div
-                                key={navItem._metadata.uid}
+                                key={navItem?._metadata?.uid}
                                 className="relative group"
-                                onMouseEnter={() => navItem.has_dropdown && handleDropdownEnter(navItem._metadata.uid)}
+                                onMouseEnter={() => navItem?.has_dropdown && handleDropdownEnter(navItem?._metadata?.uid)}
                                 onMouseLeave={handleDropdownLeave}
                             >
                                 <a
-                                    href={navItem.navigation_url.href}
+                                    href={navItem?.navigation_url?.href || '#'}
                                     className="flex items-center space-x-1 text-xs text-[#f9ebd1] transition-colors duration-200 font-medium cursor-pointer"
                                 >
-                                    <span>{navItem.navigation_url.title}</span>
+                                    <span>{navItem?.navigation_url?.title}</span>
                                 </a>
 
                                 {/* Dropdown Menu */}
-                                {navItem.has_dropdown && navItem.dropdown_items.length > 0 && (
+                                {navItem?.has_dropdown && navItem?.dropdown_items?.length > 0 && (
                                     <div
-                                        className={`absolute top-full left-0 mt-10 w-56 bg-[#2a324a] rounded-lg shadow-xl py-3 z-50 transition-all duration-200 ${activeDropdown === navItem._metadata.uid
+                                        className={`absolute top-full left-0 mt-10 w-56 bg-[#2a324a] rounded-lg shadow-xl py-3 z-50 transition-all duration-200 ${activeDropdown === navItem?._metadata?.uid
                                             ? 'opacity-100 visible translate-y-0'
                                             : 'opacity-0 invisible -translate-y-2'
                                             }`}
                                     >
                                         {/* Arrow pointer */}
                                         <div className="absolute -top-1.5 left-6 w-4 h-4 bg-[#2a324a] transform rotate-45 rounded-sm"></div>
-                                        {navItem.dropdown_items.map((dropdownItem) => (
+                                        {navItem?.dropdown_items?.map((dropdownItem) => (
                                             <a
-                                                key={dropdownItem._metadata.uid}
-                                                href={dropdownItem.dropdown_url.href}
+                                                key={dropdownItem?._metadata?.uid}
+                                                href={dropdownItem?.dropdown_url?.href || '#'}
                                                 className="block px-4 py-1.5 text-[#f9ebd1] transition-colors duration-200 text-xs font-medium"
                                             >
-                                                {dropdownItem.dropdown_url.title}
+                                                {dropdownItem?.dropdown_url?.title}
                                             </a>
                                         ))}
                                     </div>
@@ -119,17 +119,17 @@ export default function LunaParkHeader() {
 
                         {/* Call to Action Button */}
                         <button
-                            onClick={() => router.push(headerData.call_to_action_buttons.button_url.href)}
+                            onClick={() => router.push(headerData?.call_to_action_buttons?.button_url?.href || '/')}
                             className="bg-[#aa3030] text-[#f9ebd1] px-6 py-2.5 text-sm rounded-full font-bold transition-colors duration-200 cursor-pointer"
                         >
-                            {headerData.call_to_action_buttons.button_url.title}
+                            {headerData?.call_to_action_buttons?.button_url?.title}
                         </button>
 
                         {/* User Actions */}
                         <div className="flex items-center space-x-2">
-                            {headerData.user_actions.show_login && (
+                            {headerData?.user_actions?.show_login && (
                                 <Link
-                                    href={headerData.user_actions.login_url.href}
+                                    href={headerData?.user_actions?.login_url?.href || '#'}
                                     className="flex items-center space-x-1 text-white hover:text-orange-400 transition-colors duration-200 text-sm"
                                 >
                                     <svg
@@ -147,29 +147,29 @@ export default function LunaParkHeader() {
                                             />
                                         </g>
                                     </svg>
-                                    <span className="hidden sm:inline text-xs text-[#f9ebd1]">{headerData.user_actions.login_url.title}</span>
+                                    <span className="hidden sm:inline text-xs text-[#f9ebd1]">{headerData?.user_actions?.login_url?.title}</span>
                                 </Link>
                             )}
 
                             <span className="text-[#007aff]">|</span>
 
-                            {headerData.user_actions.show_signup && (
+                            {headerData?.user_actions?.show_signup && (
                                 <a
-                                    href={headerData.user_actions.signup_url.href}
+                                    href={headerData?.user_actions?.signup_url?.href || '#'}
                                     className="flex items-center space-x-1 text-white hover:text-orange-400 transition-colors duration-200"
                                 >
-                                    <span className="hidden sm:inline text-[#f9ebd1] text-xs">{headerData.user_actions.signup_url.title}</span>
+                                    <span className="hidden sm:inline text-[#f9ebd1] text-xs">{headerData?.user_actions?.signup_url?.title}</span>
                                 </a>
                             )}
 
-                            {headerData.user_actions.show_cart && (
+                            {headerData?.user_actions?.show_cart && (
                                 <a
                                     href="#"
                                     className="flex items-center space-x-1 text-white hover:text-orange-400 transition-colors duration-200"
                                 >
                                     <Image
-                                        src={headerData.user_actions.cart_icon.url}
-                                        alt={headerData.user_actions.cart_icon.title}
+                                        src={headerData?.user_actions?.cart_icon?.url || '/'}
+                                        alt={headerData?.user_actions?.cart_icon?.title || 'Cart'}
                                         width={20}
                                         height={20}
                                         className="w-6 h-6"
@@ -190,23 +190,23 @@ export default function LunaParkHeader() {
                 {/* Mobile Navigation */}
                 <div className="md:hidden border-t border-blue-800 py-4">
                     <nav className="space-y-2">
-                        {headerData.primary_navigation.map((navItem) => (
-                            <div key={navItem._metadata.uid}>
+                        {headerData?.primary_navigation?.map((navItem) => (
+                            <div key={navItem?._metadata?.uid}>
                                 <a
-                                    href={navItem.navigation_url.href}
+                                    href={navItem?.navigation_url?.href || '#'}
                                     className="block py-2 text-white hover:text-orange-400 transition-colors duration-200"
                                 >
-                                    {navItem.navigation_url.title}
+                                    {navItem?.navigation_url?.title}
                                 </a>
-                                {navItem.has_dropdown && navItem.dropdown_items.length > 0 && (
+                                {navItem?.has_dropdown && navItem?.dropdown_items?.length > 0 && (
                                     <div className="ml-4 space-y-1">
-                                        {navItem.dropdown_items.map((dropdownItem) => (
+                                        {navItem?.dropdown_items?.map((dropdownItem) => (
                                             <a
-                                                key={dropdownItem._metadata.uid}
-                                                href={dropdownItem.dropdown_url.href}
+                                                key={dropdownItem?._metadata?.uid}
+                                                href={dropdownItem?.dropdown_url?.href || '#'}
                                                 className="block py-1 text-gray-300 hover:text-orange-400 transition-colors duration-200"
                                             >
-                                                {dropdownItem.dropdown_url.title}
+                                                {dropdownItem?.dropdown_url?.title}
                                             </a>
                                         ))}
                                     </div>

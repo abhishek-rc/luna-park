@@ -62,7 +62,7 @@ export default function HeroSection() {
                         setVideoLoaded(true);
                     }}
                 >
-                    <source src={hero_section.hero_cover.url} type="video/mp4" />
+                    <source src={hero_section?.hero_cover?.url || ''} type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -73,10 +73,10 @@ export default function HeroSection() {
                     {/* Main CTA Button */}
                     <div>
                         <Link
-                            href={hero_section.hero_cta.href}
+                            href={hero_section?.hero_cta?.href || '#'}
                             className="inline-block bg-[#aa3030] text-white font-semibold text-sm px-8 py-2.5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl"
                         >
-                            {hero_section.hero_cta.title}
+                            {hero_section?.hero_cta?.title}
                         </Link>
                     </div>
                 </div>

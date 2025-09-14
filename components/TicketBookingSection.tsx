@@ -45,7 +45,7 @@ export default function TicketBookingSection() {
     }
 
     const { ticketbooking_group } = homepageData;
-    const activeTabData = ticketbooking_group.find(tab => tab.tab_id === activeTab);
+    const activeTabData = ticketbooking_group?.find(tab => tab?.tab_id === activeTab);
 
     return (
         <section className="bg-[#305871] py-24 px-60">
@@ -60,16 +60,16 @@ export default function TicketBookingSection() {
                 {/* Tab Navigation */}
                 <div className="flex justify-center mb-12">
                     <div className="flex space-x-2">
-                        {ticketbooking_group.map((tab) => (
+                        {ticketbooking_group?.map((tab) => (
                             <button
-                                key={tab.tab_id}
-                                onClick={() => setActiveTab(tab.tab_id)}
-                                className={`py-2 font-semibold text-xs w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === tab.tab_id
+                                key={tab?.tab_id}
+                                onClick={() => setActiveTab(tab?.tab_id)}
+                                className={`py-2 font-semibold text-xs w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === tab?.tab_id
                                     ? 'bg-[#aa3030] text-white'
                                     : 'bg-[#f9ebd1] text-[#305871]'
                                     }`}
                             >
-                                {tab.tab_name}
+                                {tab?.tab_name}
                             </button>
                         ))}
                     </div>
@@ -78,16 +78,16 @@ export default function TicketBookingSection() {
                 {/* Ticket Cards Grid */}
                 {activeTabData && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {activeTabData.ticketbooking_cards.map((card) => (
+                        {activeTabData?.ticketbooking_cards?.map((card) => (
                             <div
-                                key={card._metadata.uid}
-                                className="bg-white rounded-4xl overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
+                                key={card?._metadata?.uid}
+                                className="bg-[#e1e8ec] rounded-4xl overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
                             >
                                 {/* Card Image */}
                                 <div className="relative h-48 w-full">
                                     <Image
-                                        src={card.card_image.url}
-                                        alt={card.card_title}
+                                        src={card?.card_image?.url || '/'}
+                                        alt={card?.card_title || 'Card'}
                                         fill
                                         className="object-cover"
                                     />
@@ -96,15 +96,15 @@ export default function TicketBookingSection() {
                                 {/* Card Content */}
                                 <div className="p-4 pb-6">
                                     <h3 className="text-lg font-bold text-[#305871] mb-4">
-                                        {card.card_title}
+                                        {card?.card_title}
                                     </h3>
 
                                     {/* CTA Button */}
                                     <Link
-                                        href={card.card_cta.href}
+                                        href={card?.card_cta?.href || '#'}
                                         className="block w-full text-center bg-white border-1 border-[#aa3030] hover:border-[#305871] text-[#aa3030] font-bold py-2 px-4 rounded-full hover:text-[#305871] transition-all duration-200 text-xs"
                                     >
-                                        {card.card_cta.title}
+                                        {card?.card_cta?.title}
                                     </Link>
                                 </div>
                             </div>
@@ -113,7 +113,7 @@ export default function TicketBookingSection() {
                 )}
 
                 {/* No cards message */}
-                {activeTabData && activeTabData.ticketbooking_cards.length === 0 && (
+                {activeTabData && activeTabData?.ticketbooking_cards?.length === 0 && (
                     <div className="text-center text-white py-12">
                         <p className="text-lg">No tickets available for this category.</p>
                     </div>

@@ -79,7 +79,7 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                     const rotationClass = actualIndex % 2 === 0 ? '-rotate-1' : 'rotate-2';
 
                     return (
-                        <SwiperSlide key={event._metadata.uid}>
+                        <SwiperSlide key={event?._metadata?.uid}>
                             <div
                                 className={`relative group transform transition-transform duration-300 w-104 ${rotationClass}`}
                                 style={{
@@ -98,8 +98,8 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                     {/* Left Section - Event Image (60% width) */}
                                     <div className="relative w-3/7 h-56">
                                         <Image
-                                            src={event.event_image.url}
-                                            alt={event.event_heading}
+                                            src={event?.event_image?.url || '/'}
+                                            alt={event?.event_heading || 'Event'}
                                             fill
                                             className="object-cover"
                                         />
@@ -109,20 +109,20 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                     <div className="w-4/7 bg-[#f9ebd1] h-58 py-10 px-6 flex flex-col relative">
                                         <div className="flex-1 flex flex-col justify-start">
                                             <h3 className="text-sm font-bold text-[#305871] mb-3 leading-tight">
-                                                {event.event_heading}
+                                                {event?.event_heading}
                                             </h3>
                                             <p className="text-xs text-[#305871] line-clamp-3 leading-relaxed h-[3.6rem] overflow-hidden">
-                                                {event.event_description}
+                                                {event?.event_description}
                                             </p>
                                         </div>
 
                                         {/* Button positioned at bottom */}
                                         <div className="absolute bottom-10 left-6 right-6">
                                             <Link
-                                                href={event.event_card_cta.href}
+                                                href={event?.event_card_cta?.href || '#'}
                                                 className="inline-block bg-[#aa3030] text-[#f9ebd1] font-medium py-2 px-4 rounded-full hover:bg-[#305871] transition-colors duration-200 text-xs uppercase tracking-wide"
                                             >
-                                                {event.event_card_cta.title}
+                                                {event?.event_card_cta?.title}
                                             </Link>
                                         </div>
                                     </div>

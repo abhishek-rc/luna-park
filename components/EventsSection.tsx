@@ -38,7 +38,7 @@ export default function EventsSection() {
     }
 
     const { event_group } = homepageData;
-    const events = event_group.event_card;
+    const events = event_group?.event_card || [];
 
     // Function to split events into chunks for multiple carousels (max 2 carousels)
     const splitEventsIntoCarousels = (events: any[], maxEventsPerCarousel: number = 6) => {
