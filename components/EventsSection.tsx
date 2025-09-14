@@ -57,11 +57,11 @@ export default function EventsSection() {
     const eventCarousels = splitEventsIntoCarousels(events);
 
     return (
-        <section className="bg-[#3C8091] py-24 px-60">
+        <section className="bg-[#3C8091] py-24">
             <div className="container mx-auto max-w-7xl">
                 {/* Section Title */}
                 <div className="text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold uppercase text-[#f9ebd1]">
+                    <h2 className="text-2xl md:text-4xl font-bold uppercase text-[#f9ebd1]">
                         WHAT&apos;S ON AT LUNA PARK
                     </h2>
                 </div>
@@ -74,7 +74,7 @@ export default function EventsSection() {
                             eventCarousels.slice(0, carouselIndex).reduce((sum, carousel) => sum + carousel.length, 0);
 
                         return (
-                            <div key={carouselIndex} className={carouselIndex > 0 ? 'mt-16' : ''}>
+                            <div key={carouselIndex} className={carouselIndex > 0 ? 'mt-16' : '' + ''}>
                                 <EventCarousel
                                     events={carouselEvents}
                                     startIndex={startIndex}

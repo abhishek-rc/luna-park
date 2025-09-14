@@ -56,19 +56,19 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                 breakpoints={{
                     320: {
                         slidesPerView: 1.2,
-                        spaceBetween: 1,
+                        spaceBetween: 8,
                     },
                     640: {
                         slidesPerView: 2,
-                        spaceBetween: 1,
+                        spaceBetween: 8,
                     },
                     768: {
                         slidesPerView: 2.5,
-                        spaceBetween: 1,
+                        spaceBetween: 8,
                     },
                     1024: {
                         slidesPerView: 2.5,
-                        spaceBetween: 1,
+                        spaceBetween: 8,
                     },
                 }}
                 className="events-carousel"
@@ -77,11 +77,12 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                     // Even/odd rotation pattern based on actual event index
                     const actualIndex = startIndex + index;
                     const rotationClass = actualIndex % 2 === 0 ? '-rotate-1' : 'rotate-2';
+                    // const rotationClass = '';
 
                     return (
                         <SwiperSlide key={event?._metadata?.uid}>
                             <div
-                                className={`relative group transform transition-transform duration-300 w-104 ${rotationClass}`}
+                                className={`relative group transform transition-transform duration-500 ${rotationClass}`}
                                 style={{
                                     WebkitMaskImage: 'url(/ticket-pass-h.svg)',
                                     WebkitMaskSize: 'contain',
@@ -91,24 +92,32 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                     maskSize: 'contain',
                                     maskRepeat: 'no-repeat',
                                     maskPosition: 'center',
+                                    width: '400px',
+                                    height: '240px',
+                                    scale: '1.2',
+
                                 }}
                             >
                                 {/* Card Content */}
-                                <div className="bg-[#f9ebd1] flex items-stretch">
+                                <div className="bg-[#f9ebd1] flex items-stretch h-full">
                                     {/* Left Section - Event Image (60% width) */}
-                                    <div className="relative w-3/7 h-56">
+                                    <div className="relative w-3/7 h-full overflow-hidden">
                                         <Image
                                             src={event?.event_image?.url || '/'}
                                             alt={event?.event_heading || 'Event'}
                                             fill
-                                            className="object-cover"
+                                            className="object-cover w-full h-full"
+                                            style={{
+                                                objectFit: 'cover',
+                                                objectPosition: 'center'
+                                            }}
                                         />
                                     </div>
 
                                     {/* Right Section - Event Details (40% width) */}
                                     <div className="w-4/7 bg-[#f9ebd1] h-58 py-10 px-6 flex flex-col relative">
                                         <div className="flex-1 flex flex-col justify-start">
-                                            <h3 className="text-sm font-bold text-[#305871] mb-3 leading-tight">
+                                            <h3 className="text-md font-bold text-[#305871] mb-3 leading-tight">
                                                 {event?.event_heading}
                                             </h3>
                                             <p className="text-xs text-[#305871] line-clamp-3 leading-relaxed h-[3.6rem] overflow-hidden">
@@ -117,7 +126,7 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                         </div>
 
                                         {/* Button positioned at bottom */}
-                                        <div className="absolute bottom-10 left-6 right-6">
+                                        <div className="absolute bottom-8 left-6 right-6">
                                             <Link
                                                 href={event?.event_card_cta?.href || '#'}
                                                 className="inline-block bg-[#aa3030] text-[#f9ebd1] font-medium py-2 px-4 rounded-full hover:bg-[#305871] transition-colors duration-200 text-xs uppercase tracking-wide"

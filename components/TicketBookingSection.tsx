@@ -48,11 +48,11 @@ export default function TicketBookingSection() {
     const activeTabData = ticketbooking_group?.find(tab => tab?.tab_id === activeTab);
 
     return (
-        <section className="bg-[#305871] py-24 px-60">
+        <section className="bg-[#305871] py-24">
             <div className="container mx-auto px-4 max-w-7xl">
                 {/* Section Title */}
                 <div className="text-center mb-20">
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#f9ebd1] uppercase">
+                    <h2 className="text-2xl md:text-4xl font-bold text-[#f9ebd1] uppercase">
                         BOOK YOUR TICKETS ONLINE
                     </h2>
                 </div>
@@ -64,7 +64,7 @@ export default function TicketBookingSection() {
                             <button
                                 key={tab?.tab_id}
                                 onClick={() => setActiveTab(tab?.tab_id)}
-                                className={`py-2 font-semibold text-xs w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === tab?.tab_id
+                                className={`py-2 font-semibold text-sm w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === tab?.tab_id
                                     ? 'bg-[#aa3030] text-white'
                                     : 'bg-[#f9ebd1] text-[#305871]'
                                     }`}
@@ -95,14 +95,14 @@ export default function TicketBookingSection() {
 
                                 {/* Card Content */}
                                 <div className="p-4 pb-6">
-                                    <h3 className="text-lg font-bold text-[#305871] mb-4">
+                                    <h3 className="text-2xl py-4 font-bold text-[#305871] mb-4">
                                         {card?.card_title}
                                     </h3>
 
                                     {/* CTA Button */}
                                     <Link
                                         href={card?.card_cta?.href || '#'}
-                                        className="block w-full text-center bg-white border-1 border-[#aa3030] hover:border-[#305871] text-[#aa3030] font-bold py-2 px-4 rounded-full hover:text-[#305871] transition-all duration-200 text-xs"
+                                        className="block w-full text-center bg-[#e1e8ec] border-1 border-[#aa3030] hover:border-[#305871] text-[#aa3030] font-bold py-3 px-4 rounded-full hover:text-[#305871] transition-all duration-200 text-xs"
                                     >
                                         {card?.card_cta?.title}
                                     </Link>
