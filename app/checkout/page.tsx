@@ -26,7 +26,8 @@ export default function TicketBooking() {
     fetchContent("riderpass");
   }, []);
 
-  console.log(content, "111content");
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -52,29 +53,34 @@ export default function TicketBooking() {
             SELECT YOUR TICKETS
           </h2>
 
-          <div className="bg-white rounded-2xl shadow p-6 flex items-center">
+          {content.map((item, index) => (
+            <div    key={item?.id || index} className="bg-white rounded-2xl shadow p-6 flex items-center">
             <img
-              src={content[0]?.url}
+              src={item?.url}
               alt="Unlimited Rides"
               className="rounded-xl w-[50%] object-cover mr-6"
             />
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-800">
-                {content[0]?.title.toUpperCase() || "Default Title"}
+                {item?.title.toUpperCase() || "Default Title"}
               </h3>
 
-           {!passOpen&&<>   <hr className="border-t-2 border-dotted border-gray-400 my-4" />
-              <p className="text-gray-600 mb-4">
-                {content[0]?.multi_line ||
-                  "Default description about the ticket."}
-              </p>
-
-              <button
-                className="mt-4 text-red-600 font-semibold text-sm"
-                onClick={() => setPassOpen(!passOpen)}
-              >
-                SELECT
-              </button></>}
+              {!passOpen && (
+                <>
+                  {" "}
+                  <hr className="border-t-2 border-dotted border-gray-400 my-4" />
+                  <p className="text-gray-600 mb-4">
+                    {item?.multi_line ||
+                      "Default description about the ticket."}
+                  </p>
+                  <button
+                    className="mt-4 text-red-600 font-semibold text-sm"
+                    onClick={() => setPassOpen(!passOpen)}
+                  >
+                    SELECT
+                  </button>
+                </>
+              )}
 
               {passOpen && (
                 <div className="mt-4 space-y-4">
@@ -82,10 +88,10 @@ export default function TicketBooking() {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-semibold">
-                        Unlimited Rides Pass Yellow
+                        {item?.select_1_title}
                       </p>
                       <p className="text-sm text-gray-500">
-                        For riders 132cm+ in height
+                        {item.select2description}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -111,10 +117,10 @@ export default function TicketBooking() {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-semibold">
-                        Unlimited Rides Pass Red/Green
+                        {content[0].select2_title}
                       </p>
                       <p className="text-sm text-gray-500">
-                        For riders 85cm - 132cm in height
+                        {content[0].select2description}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -135,23 +141,22 @@ export default function TicketBooking() {
                       </button>
                     </div>
                   </div>
-                     {/* Clear */}
-              <button
-                onClick={() => {
-                  setYellowPass(0);
-                  setRedGreenPass(0);
-                }}
-                className="mt-4 text-red-600 font-semibold text-sm"
-              >
-                CLEAR
-              </button>
+                  {/* Clear */}
+                  <button
+                    onClick={() => {
+                      setYellowPass(0);
+                      setRedGreenPass(0);
+                      setPassOpen(false);
+                    }}
+                    className="mt-4 text-red-600 font-semibold text-sm"
+                  >
+                    CLEAR
+                  </button>
                 </div>
-                
               )}
-
-           
             </div>
           </div>
+          ))}
         </div>
         <Summary
           totalTickets={totalTickets}

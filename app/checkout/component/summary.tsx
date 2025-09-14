@@ -13,10 +13,11 @@ const Summary: React.FC<SummaryProps> = ({
   totalPrice,
 })  => {
   return (
-    <>
+    <div>
       {/* Summary */}
-      <div className="bg-white rounded-2xl shadow p-6 space-y-4">
-        <h3 className="text-xl font-bold text-gray-800">SUMMARY</h3>
+         <h3 className="text-xl font-bold text-gray-800">SUMMARY</h3>
+      <div className="bg-white rounded-2xl shadow p-6 mt-6 space-y-4 max-h-[400px]">
+     
         <div>
           <p className="font-semibold">TICKETS</p>
           <p className="text-gray-500">
@@ -44,7 +45,7 @@ const Summary: React.FC<SummaryProps> = ({
           NEXT
         </button>
       </div>
-    </>
+</div>
   );
 };
 
