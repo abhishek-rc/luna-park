@@ -122,7 +122,7 @@ export default function LunaParkHeader() {
                             onClick={() => router.push(headerData?.call_to_action_buttons?.button_url?.href || '/')}
                             className="bg-[#aa3030] text-[#f9ebd1] px-6 py-2.5 text-sm rounded-full font-bold transition-colors duration-200 cursor-pointer"
                         >
-                            {headerData?.call_to_action_buttons?.button_url?.title}
+                            {headerData?.call_to_action_buttons?.button_url?.title || 'Book Now'}
                         </button>
 
                         {/* User Actions */}
@@ -196,7 +196,7 @@ export default function LunaParkHeader() {
                                     href={navItem?.navigation_url?.href || '#'}
                                     className="block py-2 text-white hover:text-orange-400 transition-colors duration-200"
                                 >
-                                    {navItem?.navigation_url?.title}
+                                    {navItem?.navigation_url?.title || 'Link'}
                                 </a>
                                 {navItem?.has_dropdown && navItem?.dropdown_items?.length > 0 && (
                                     <div className="ml-4 space-y-1">
@@ -206,7 +206,7 @@ export default function LunaParkHeader() {
                                                 href={dropdownItem?.dropdown_url?.href || '#'}
                                                 className="block py-1 text-gray-300 hover:text-orange-400 transition-colors duration-200"
                                             >
-                                                {dropdownItem?.dropdown_url?.title}
+                                                {dropdownItem?.dropdown_url?.title || 'Sub Link'}
                                             </a>
                                         ))}
                                     </div>

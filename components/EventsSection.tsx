@@ -37,13 +37,13 @@ export default function EventsSection() {
         );
     }
 
-    const { event_group } = homepageData;
+    const { event_group } = homepageData || {};
     const events = event_group?.event_card || [];
 
     // Function to split events into chunks for multiple carousels (max 2 carousels)
     const splitEventsIntoCarousels = (events: any[], maxEventsPerCarousel: number = 6) => {
-        if (events.length <= maxEventsPerCarousel) {
-            return [events];
+        if (!events || events.length <= maxEventsPerCarousel) {
+            return [events || []];
         }
 
         // If more than 6 events, split into exactly 2 carousels
@@ -61,22 +61,22 @@ export default function EventsSection() {
             <div className="container mx-auto max-w-7xl">
                 {/* Section Title */}
                 <div className="text-center">
-                    <h2 className="text-2xl md:text-4xl font-bold uppercase text-[#f9ebd1]">
+                    <h2 className="text-2xl md:text-4xl font-black uppercase text-[#f9ebd1]">
                         WHAT&apos;S ON AT LUNA PARK
                     </h2>
                 </div>
 
                 <div className='my-12'>
                     {/* Render multiple carousels if more than 6 events */}
-                    {eventCarousels.map((carouselEvents, carouselIndex) => {
+                    {eventCarousels?.map((carouselEvents, carouselIndex) => {
                         // Calculate start index based on previous carousels' event counts
                         const startIndex = carouselIndex === 0 ? 0 :
-                            eventCarousels.slice(0, carouselIndex).reduce((sum, carousel) => sum + carousel.length, 0);
+                            eventCarousels?.slice(0, carouselIndex)?.reduce((sum, carousel) => sum + (carousel?.length || 0), 0) || 0;
 
                         return (
                             <div key={carouselIndex} className={carouselIndex > 0 ? 'mt-16' : '' + ''}>
                                 <EventCarousel
-                                    events={carouselEvents}
+                                    events={carouselEvents || []}
                                     startIndex={startIndex}
                                 />
                             </div>
@@ -86,7 +86,7 @@ export default function EventsSection() {
 
                 {/* View All Events Button */}
                 <div className="text-center cursor-pointer">
-                    <button className="border-1 border-[#f9ebd1] text-[#f9ebd1] font-semibold py-2 px-6 text-xs rounded-full hover:bg-[#f9ebd1] hover:text-[#305871] transition-all duration-200 cursor-pointer">
+                    <button className="border-1 border-[#f9ebd1] text-[#f9ebd1] font-semibold py-3 px-6 text-xs rounded-full hover:bg-[#f9ebd1] hover:text-[#305871] transition-all duration-200 cursor-pointer">
                         VIEW ALL EVENTS
                     </button>
                 </div>

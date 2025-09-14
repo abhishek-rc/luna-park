@@ -73,14 +73,14 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                 }}
                 className="events-carousel"
             >
-                {events.map((event, index) => {
+                {events?.map((event, index) => {
                     // Even/odd rotation pattern based on actual event index
-                    const actualIndex = startIndex + index;
+                    const actualIndex = (startIndex || 0) + index;
                     const rotationClass = actualIndex % 2 === 0 ? '-rotate-1' : 'rotate-2';
                     // const rotationClass = '';
 
                     return (
-                        <SwiperSlide key={event?._metadata?.uid}>
+                        <SwiperSlide key={event?._metadata?.uid || index}>
                             <div
                                 className={`relative group transform transition-transform duration-500 ${rotationClass}`}
                                 style={{
@@ -118,10 +118,10 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                     <div className="w-4/7 bg-[#f9ebd1] h-58 py-10 px-6 flex flex-col relative">
                                         <div className="flex-1 flex flex-col justify-start">
                                             <h3 className="text-md font-bold text-[#305871] mb-3 leading-tight">
-                                                {event?.event_heading}
+                                                {event?.event_heading || 'Event'}
                                             </h3>
                                             <p className="text-xs text-[#305871] line-clamp-3 leading-relaxed h-[3.6rem] overflow-hidden">
-                                                {event?.event_description}
+                                                {event?.event_description || 'No description available'}
                                             </p>
                                         </div>
 
@@ -131,7 +131,7 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
                                                 href={event?.event_card_cta?.href || '#'}
                                                 className="inline-block bg-[#aa3030] text-[#f9ebd1] font-medium py-2 px-4 rounded-full hover:bg-[#305871] transition-colors duration-200 text-xs uppercase tracking-wide"
                                             >
-                                                {event?.event_card_cta?.title}
+                                                {event?.event_card_cta?.title || 'Learn More'}
                                             </Link>
                                         </div>
                                     </div>
@@ -145,7 +145,7 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
             {/* Custom Navigation Buttons */}
             {!isBeginning && (
                 <button
-                    onClick={() => swiperRef.current?.slidePrev()}
+                    onClick={() => swiperRef?.current?.slidePrev()}
                     className="swiper-button-prev-custom absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#aa3030] rounded-full flex items-center justify-center text-white transition-colors duration-200 shadow-lg cursor-pointer"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@ export default function EventCarousel({ events, startIndex = 0 }: EventCarouselP
             )}
             {!isEnd && (
                 <button
-                    onClick={() => swiperRef.current?.slideNext()}
+                    onClick={() => swiperRef?.current?.slideNext()}
                     className="swiper-button-next-custom absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-[#aa3030] rounded-full flex items-center justify-center text-white transition-colors duration-200 shadow-lg cursor-pointer"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
