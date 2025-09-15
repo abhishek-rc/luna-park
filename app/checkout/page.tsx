@@ -221,6 +221,7 @@ export default function TicketBooking() {
                       | undefined;
                   }) => (
                     <div
+                      key={`cal-${String(day.date)}`}
                       className={`aspect-square rounded-lg border-2 p-2 text-center ${
                         day.available
                           ? "border-green-200 bg-green-50 hover:border-green-400 cursor-pointer"
