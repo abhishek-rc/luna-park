@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="550px" height="295px" viewBox="0 0 550 295" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>elements/desktop/event-modal</title>
+    <defs>
+        <path d="M493.625498,4.54747351e-13 C493.625498,17.327659 507.672341,31.374502 525,31.374502 L525.001002,31.374502 L525.001,56.474 L522.450199,56.4741036 C517.020959,56.4741036 512.602267,60.8007744 512.454041,66.1941987 L512.450199,66.4741036 L512.450199,68.9737464 C512.450199,74.4965939 516.927352,78.9737464 522.450199,78.9737464 L522.450199,78.9737464 L525,78.973 L525,99.352 L522.450199,99.3525896 C517.020959,99.3525896 512.602267,103.67926 512.454041,109.072685 L512.450199,109.35259 L512.450199,111.852233 C512.450199,117.37508 516.927352,121.852233 522.450199,121.852233 L522.450199,121.852233 L525,121.852 L525,143.276 L522.450199,143.276892 C517.020959,143.276892 512.602267,147.603563 512.454041,152.996988 L512.450199,153.276892 L512.450199,155.776535 C512.450199,161.299383 516.927352,165.776535 522.450199,165.776535 L522.450199,165.776535 L525,165.776 L525,186.155 L522.450199,186.155378 C517.020959,186.155378 512.602267,190.482049 512.454041,195.875474 L512.450199,196.155378 L512.450199,198.655021 C512.450199,204.177869 516.927352,208.655021 522.450199,208.655021 L522.450199,208.655021 L525,208.655 L525,231.125 C507.845618,231.125498 493.906763,244.892809 493.629701,261.981165 L493.625498,262.5 L493.625498,262.501002 L262.5,262.5 L31.374502,262.501002 L31.374502,262.5 L31.3702987,261.981165 C31.0960077,245.063692 17.4317933,231.401176 0.513656367,231.129135 L0,231.125 L-0.00100159513,31.374502 C17.1543724,31.374502 31.093237,17.6071912 31.3702987,0.518834759 L31.374502,4.54747351e-13 L493.625498,4.54747351e-13 Z" id="path-1"></path>
+        <filter x="-1.7%" y="-3.4%" width="103.4%" height="106.9%" filterUnits="objectBoundingBox" id="filter-3">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.15081403 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="01---home" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="elements/desktop/event-modal" transform="translate(272.002741, 147.657048) rotate(0.000000) translate(-272.002741, -147.657048) translate(5.002741, 16.157048)">
+            <g id="Bitmap" transform="translate(9.000000, 0.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Mask">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-1"></use>
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                </g>
+            </g>
+            <rect id="Rectangle" fill="#FFFFFF" fill-rule="nonzero" x="191" y="19" width="61" height="61" rx="5"></rect>
+            <g id="Group-2" transform="translate(0.000000, 47.000000)"></g>
+        </g>
+    </g>
+</svg>
