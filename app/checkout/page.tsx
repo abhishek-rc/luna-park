@@ -62,11 +62,18 @@ export default function TicketBooking() {
 
   function generateCalendarData(): Day[] {
     // September has 30 days.
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonthIndex = today.getMonth(); // 0-11
+    const isSeptember = currentMonthIndex === 8 && currentYear === 2025; // 8 => September
+
     return Array.from({ length: 30 }, (_, i) => {
       const date = i + 1;
-      // example availability pattern (customize as needed)
-      const available = date % 3 !== 0;
-      // example dynamic prices — you could fetch these from an API instead
+      // Compute if this calendar day is in the past relative to today (only if we are in Sep 2025)
+      const isPast = isSeptember && date < today.getDate();
+      // base availability pattern
+      const baseAvailable = date % 3 !== 0;
+      const available = !isPast && baseAvailable;
       const yellowPrice = 50 + (date % 5) * 2;
       const redGreenPrice = 50 + (date % 4) * 3;
       return { date, available, yellowPrice, redGreenPrice };
@@ -217,9 +224,14 @@ export default function TicketBooking() {
                       className={`aspect-square rounded-lg border-2 p-2 text-center ${
                         day.available
                           ? "border-green-200 bg-green-50 hover:border-green-400 cursor-pointer"
-                          : "border-gray-200 bg-gray-50"
+                          : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
                       }`}
-                      // onClick={() => day.available && onDateChange(`2025-09-${day.date.toString().padStart(2, '0')}`)}
+                      onClick={() => {
+                        if (day.available) {
+                          const iso = `2025-09-${String(day.date).padStart(2, '0')}`;
+                          setSelectedDate(iso);
+                        }
+                      }}
                     >
                       <div className="text-sm font-medium mb-1">{day.date}</div>
                       {day.available ? (
@@ -367,6 +379,7 @@ export default function TicketBooking() {
           redGreenPass={redGreenPass}
           totalPrice={totalPrice}
           setTicektInfo={setTicektInfo}
+          selectedDate={selectedDate}
         />
       </div>
       <CheckoutFooter />

@@ -5,6 +5,7 @@ interface SummaryProps {
   redGreenPass: number;
   totalPrice: number | string;
   setTicektInfo: any;
+  selectedDate?: string | null;
 }
 
 const Summary: React.FC<SummaryProps> = ({
@@ -12,7 +13,8 @@ const Summary: React.FC<SummaryProps> = ({
   yellowPass,
   redGreenPass,
   totalPrice,
-  setTicektInfo
+  setTicektInfo,
+  selectedDate
 })  => {
   return (
     <div>
@@ -36,7 +38,7 @@ const Summary: React.FC<SummaryProps> = ({
         </div>
         <div>
           <p className="font-semibold">DATE</p>
-          <p className="text-gray-500">Select date</p>
+          <p className="text-gray-500">{selectedDate ? selectedDate : "Select date"}</p>
         </div>
         <div>
           <p className="font-semibold">TOTAL PRICE</p>
