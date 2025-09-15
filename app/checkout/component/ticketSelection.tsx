@@ -46,7 +46,7 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
               </h3>
 
               
-                <>
+               {passOpen !== index && ( <>
                   {" "}
                   <hr className="border-t-2 border-dotted border-gray-400 my-4" />
                   <p className="text-gray-600 mb-4">
@@ -59,7 +59,7 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                   >
                     SELECT
                   </button>
-                </>
+                </>)}
               
 
               {passOpen ===index && (
