@@ -109,7 +109,7 @@ export const Extras = () => {
 
         <div className="space-y-6">
           {content.slice(0, -1).map((item) => (
-            <div key={item.id} className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+            <div key={item.uid} className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
               {item.ribbon && (
                 <div className="bg-amber-600 text-white text-center text-xs font-bold tracking-wide py-2">
                   {item.ribbon}
