@@ -4,6 +4,7 @@ interface SummaryProps {
   yellowPass: number;
   redGreenPass: number;
   totalPrice: number | string;
+  setTicektInfo: any;
 }
 
 const Summary: React.FC<SummaryProps> = ({
@@ -11,6 +12,7 @@ const Summary: React.FC<SummaryProps> = ({
   yellowPass,
   redGreenPass,
   totalPrice,
+  setTicektInfo
 })  => {
   return (
     <div>
@@ -41,7 +43,7 @@ const Summary: React.FC<SummaryProps> = ({
           <p className="text-gray-800 font-bold">{totalPrice}</p>
         </div>
 
-        <button className="w-full bg-red-600 text-white py-3 rounded-full font-semibold" >
+        <button className="w-full bg-red-600 text-white py-3 rounded-full font-semibold" onClick={()=>setTicektInfo(true)}>
           NEXT
         </button>
       </div>
