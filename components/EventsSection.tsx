@@ -74,7 +74,7 @@ export default function EventsSection() {
                             eventCarousels?.slice(0, carouselIndex)?.reduce((sum, carousel) => sum + (carousel?.length || 0), 0) || 0;
 
                         return (
-                            <div key={carouselIndex} className={carouselIndex > 0 ? 'mt-16' : '' + ''}>
+                            <div key={carouselIndex}>
                                 <EventCarousel
                                     events={carouselEvents || []}
                                     startIndex={startIndex}
