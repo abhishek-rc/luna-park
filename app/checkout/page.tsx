@@ -322,14 +322,14 @@ export default function TicketBooking() {
   return (
     <div className="min-h-screen bg-gray-50 p-6 px-10">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      {/* <div className="flex justify-between items-center mb-6">
         <img
           src={logoContent?.[0]?.url || "/luna-park-logo.png"}
           alt="Luna Park Logo"
           className="h-[80px] w-[150px] "
         />
         <button className="text-blue-900 font-semibold">LOG IN</button>
-      </div>
+      </div> */}
 
       {/* Steps */}
       <div className="flex justify-center space-x-8 text-sm font-semibold text-gray-600 mb-8">

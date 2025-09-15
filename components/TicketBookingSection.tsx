@@ -101,7 +101,7 @@ export default function TicketBookingSection() {
 
                                     {/* CTA Button */}
                                     <Link
-                                        href={card?.card_cta?.href || '#'}
+                                        href="/checkout"
                                         className="block w-full text-center bg-[#e1e8ec] border-1 border-[#aa3030] hover:border-[#305871] text-[#aa3030] font-black py-3 px-4 rounded-full hover:text-[#305871] transition-all duration-200 text-xs"
                                     >
                                         {card?.card_cta?.title || 'Book Now'}
