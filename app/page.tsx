@@ -1,5 +1,5 @@
 import Image from "next/image";
-import ContentstackExample from "../components/ContentstackExample";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
@@ -20,7 +20,6 @@ export default function Home() {
           </p>
         </div>
 
-        <ContentstackExample />
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -43,6 +42,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
