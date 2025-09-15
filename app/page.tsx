@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Footer from "../components/Footer";
 import HeroSection from "../components/HeroSection";
 import TicketBookingSection from "../components/TicketBookingSection";
 import EventsSection from "../components/EventsSection";
@@ -12,6 +14,7 @@ export default function Home() {
         <EventsSection />
         <MemoryPartyGroupSection />
       </main>
+      <Footer />
     </div>
   );
 }

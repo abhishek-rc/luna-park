@@ -12,7 +12,9 @@ export default function ContentstackExample() {
         try {
             setLoading(true);
             setError(null);
+            console.log(`Fetching ${type} content...`);
             const response = await getContentByType(type);
+            console.log(`${type} response:`, response);
             setContent(response || []);
         } catch (err) {
             console.error('Error fetching content:', err);
