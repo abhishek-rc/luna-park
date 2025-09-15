@@ -29,7 +29,7 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
   return (
     <> {/* Ticket Selection */}
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className="text-3xl md:text-[34px] font-extrabold tracking-tight text-[#0E5A6A]">
             SELECT YOUR TICKETS
           </h2>
 
@@ -41,20 +41,20 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
               className="rounded-xl w-[50%] object-cover mr-6"
             />
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-800">
+              <h3 className="text-2xl font-extrabold text-[#0E5A6A]">
                 {item?.title.toUpperCase() || "Default Title"}
               </h3>
 
               
                {passOpen !== index && ( <>
                   {" "}
-                  <hr className="border-t-2 border-dotted border-gray-400 my-4" />
-                  <p className="text-gray-600 mb-4">
+                  <hr className="border-t-2 border-dotted border-gray-300 my-4" />
+                  <p className="text-[#5C7C86] mb-4">
                     {item?.multi_line ||
                       "Default description about the ticket."}
                   </p>
                   <button
-                    className="mt-4 text-red-600 font-semibold text-sm"
+                    className="mt-4 text-[#aa3030] font-semibold text-sm border border-[#aa3030] p-[10px] rounded-full"
                     onClick={() => setPassOpen(index)}
                   >
                     SELECT
@@ -67,10 +67,10 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                   {/* Yellow Pass */}
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-semibold text-[#0E5A6A]">
                         {item?.select_1_title}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-[#5C7C86]">
                         {item.select2description}
                       </p>
                     </div>
@@ -79,14 +79,14 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                         onClick={() =>
                           setYellowPass(Math.max(0, yellowPass - 1))
                         }
-                        className="px-3 py-1 border rounded-full"
+                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
                       >
                         -
                       </button>
-                      <span>{yellowPass}</span>
+                      <span className="text-[#5C7C86]">{yellowPass}</span>
                       <button
                         onClick={() => setYellowPass(yellowPass + 1)}
-                        className="px-3 py-1 border rounded-full"
+                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
                       >
                         +
                       </button>
@@ -96,10 +96,10 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                   {/* Red/Green Pass */}
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-semibold text-[#0E5A6A]">
                         {content[0].select2_title}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-[#5C7C86]">
                         {content[0].select2description}
                       </p>
                     </div>
@@ -108,14 +108,14 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                         onClick={() =>
                           setRedGreenPass(Math.max(0, redGreenPass - 1))
                         }
-                        className="px-3 py-1 border rounded-full"
+                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
                       >
                         -
                       </button>
-                      <span>{redGreenPass}</span>
+                      <span className="text-[#5C7C86]">{redGreenPass}</span>
                       <button
                         onClick={() => setRedGreenPass(redGreenPass + 1)}
-                        className="px-3 py-1 border rounded-full"
+                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
                       >
                         +
                       </button>
@@ -128,7 +128,7 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                       setRedGreenPass(0);
                       setPassOpen(null);
                     }}
-                    className="mt-4 text-red-600 font-semibold text-sm"
+                    className="mt-4 text-[#aa3030] font-semibold text-sm text-underline"
                   >
                     CLEAR
                   </button>

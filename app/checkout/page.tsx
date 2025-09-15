@@ -95,17 +95,17 @@ export default function TicketBooking() {
 
       {/* Steps */}
       <div className="flex justify-center space-x-8 text-sm font-semibold text-gray-600 mb-8">
-        <span className="text-red-600 border-b-2 border-red-600 pb-1">
+        <span className="text-[#105974] border-b-2 border-red-600 pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6">
           01. SELECT TICKETS
         </span>
         <span
           className={`${
-            ticketInfo ? "text-red-600 border-b-2 border-red-600 pb-1" : ""
+            ticketInfo ? "text-[#105974] border-b-2 border-red-600 pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6" : "tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6"
           }`}
         >
           02. TICKETS INFO
         </span>
-        <span>03. SELECT EXTRAS</span>
+        <span className="tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6">03. SELECT EXTRAS</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
+import { getContentByType } from "../../../helper";
 
 type AddOn = {
   id: string;
@@ -46,6 +47,20 @@ const extras: AddOn[] = [
 ];
 
 export const Extras = () => {
+          const [content, setContent] = useState<any[]>([]);
+         const fetchContent = async (type: string) => {
+        try {
+          const response = await getContentByType(type);
+          setContent(response || []);
+        } catch (err) {
+          console.error("Error fetching content:", err);
+        } finally {
+        }
+      };
+      useEffect(() => {
+        fetchContent("checkoutlogo");
+      }, []);
+      console.log("contentExtras",content);
   return (
     <section className="space-y-10">
       {/* Immersive experiences */}
@@ -56,28 +71,28 @@ export const Extras = () => {
 
         <div className="bg-white rounded-xl shadow border border-gray-200 p-6 flex items-center gap-6">
           <img
-            src={immersive.image}
-            alt={immersive.title}
+            src={content[content.length-1]?.image?.url}
+            alt={content[content.length-1]?.title}
             className="w-28 h-28 rounded-md object-cover"
           />
           <div className="flex-1">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-lg font-bold text-gray-800">
-                {immersive.title}
+                {content[content.length-1]?.title}
               </h3>
-              {immersive.price && (
-                <span className="text-red-700 font-extrabold">{immersive.price}</span>
+              {content[content.length-1]?.price && (
+                <span className="text-red-700 font-extrabold">{content[content.length-1]?.price}</span>
               )}
             </div>
-            <p className="text-gray-600 mt-2 max-w-3xl">{immersive.description}</p>
-            {immersive.length && (
-              <p className="text-sm text-gray-600 mt-3 font-semibold">
-                {immersive.length}
-              </p>
-            )}
+            <p className="text-gray-600 mt-2 max-w-3xl">{content[content.length-1]?.description}</p>
+            {content[content.length-1]?.length && ( <p className="text-sm text-gray-600 mt-3 font-semibold">
+                {content[content.length-1]?.length}
+              </p>)}
+             
+     
           </div>
           <button className="whitespace-nowrap px-5 py-2 rounded-full border-2 border-blue-900 text-blue-900 font-semibold hover:bg-blue-900 hover:text-white transition-colors">
-            {immersive.cta}
+            {content[content.length-1]?.cta}
           </button>
         </div>
       </div>
@@ -93,7 +108,7 @@ export const Extras = () => {
         </p>
 
         <div className="space-y-6">
-          {extras.map((item) => (
+          {content.slice(0, -1).map((item) => (
             <div key={item.id} className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
               {item.ribbon && (
                 <div className="bg-amber-600 text-white text-center text-xs font-bold tracking-wide py-2">
@@ -103,7 +118,7 @@ export const Extras = () => {
 
               <div className="p-5 flex items-center gap-6">
                 <img
-                  src={item.image}
+                  src={item.image.url}
                   alt={item.title}
                   className="w-24 h-24 rounded-md object-cover"
                 />
