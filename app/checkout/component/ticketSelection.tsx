@@ -3,7 +3,7 @@ import { getContentByType } from "../../../helper";
 
 interface TicektSelectionProps {
   setPassOpen: any;
-  passOpen: any
+  passOpen: any;
   redGreenPass: number;
   setYellowPass: (value: number) => void;
   yellowPass: number;
@@ -11,10 +11,16 @@ interface TicektSelectionProps {
   totalPrice: number | string;
 }
 
-
-const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,setYellowPass,yellowPass,setRedGreenPass,redGreenPass}) => {
-      const [content, setContent] = useState<any[]>([]);
-     const fetchContent = async (type: string) => {
+const TicketSelection: React.FC<TicektSelectionProps> = ({
+  setPassOpen,
+  passOpen,
+  setYellowPass,
+  yellowPass,
+  setRedGreenPass,
+  redGreenPass,
+}) => {
+  const [content, setContent] = useState<any[]>([]);
+  const fetchContent = async (type: string) => {
     try {
       const response = await getContentByType(type);
       setContent(response || []);
@@ -27,26 +33,33 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
     fetchContent("riderpass");
   }, []);
   return (
-    <> {/* Ticket Selection */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-3xl md:text-[34px] font-extrabold tracking-tight text-[#0E5A6A]">
-            SELECT YOUR TICKETS
-          </h2>
+    <>
+      {" "}
+      {/* Ticket Selection */}
+      <div className="lg:col-span-2 space-y-6">
+        <h2 className="text-3xl md:text-[34px] font-extrabold tracking-tight text-[#0E5A6A]">
+          SELECT YOUR TICKETS
+        </h2>
 
-          {content.map((item, index) => (
-            <div    key={item?.id || index} className="bg-white rounded-2xl shadow p-6 flex items-center">
-            <img
-              src={item?.url}
-              alt="Unlimited Rides"
-              className="rounded-xl w-[50%] object-cover mr-6"
-            />
+        {content.map((item, index) => (
+          <div
+            key={item?.id || index}
+            className="bg-white rounded-2xl min-h-[200px] shadow flex items-center"
+          >
+            <div className="relative w-48 h-[-webkit-fill-available] flex-shrink-0 mr-6">
+              <img
+                src={item?.url}
+                alt={item?.title || "Unlimited Rides"}
+                className="absolute inset-0 w-full h-full object-cover rounded-l-xl"
+              />
+            </div>
             <div className="flex-1">
               <h3 className="text-2xl font-extrabold text-[#0E5A6A]">
                 {item?.title.toUpperCase() || "Default Title"}
               </h3>
 
-              
-               {passOpen !== index && ( <>
+              {passOpen !== index && (
+                <>
                   {" "}
                   <hr className="border-t-2 border-dotted border-gray-300 my-4" />
                   <p className="text-[#5C7C86] mb-4">
@@ -59,10 +72,10 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
                   >
                     SELECT
                   </button>
-                </>)}
-              
+                </>
+              )}
 
-              {passOpen ===index && (
+              {passOpen === index && (
                 <div className="mt-4 space-y-4">
                   {/* Yellow Pass */}
                   <div className="flex justify-between items-center">
@@ -136,8 +149,9 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({setPassOpen,passOpen,s
               )}
             </div>
           </div>
-          ))}
-        </div></>
+        ))}
+      </div>
+    </>
   );
 };
 

@@ -1,50 +1,8 @@
 import React, { useState,useEffect } from "react";
 import { getContentByType } from "../../../helper";
 
-type AddOn = {
-  id: string;
-  title: string;
-  description: string;
-  price?: string;
-  length?: string;
-  image: string;
-  cta?: string;
-  ribbon?: string;
-};
 
-const immersive: AddOn = {
-  id: "dream-circus",
-  title: "DREAM CIRCUS",
-  description:
-    "Dream Circus offers thrills from the comfort of your seat with a cutting‑edge technology‑driven experience that is astonishing for all ages!",
-  price: "$15",
-  length: "45 minutes length",
-  image:
-    "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=600&auto=format&fit=crop",
-  cta: "SEE SESSIONS",
-};
 
-const extras: AddOn[] = [
-  {
-    id: "photo-pass",
-    title: "DAY PHOTO PASS",
-    description:
-      "Keep your memories forever with our Photo Pass, unlocking unlimited digital photo downloads during your visit. Available for use on 3 rides and candid photos. All 3 rides require an adult rider.",
-    image:
-      "https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=600&auto=format&fit=crop",
-    cta: "SELECT",
-    ribbon: "BUY ONLINE AND SAVE",
-  },
-  {
-    id: "game-play",
-    title: "6 GAME PLAY",
-    description:
-      "Grab a bundle of game tokens and challenge friends across our classic midway games.",
-    image:
-      "https://images.unsplash.com/photo-1520975940478-3a0a6d7e3d1d?q=80&w=600&auto=format&fit=crop",
-    cta: "SELECT",
-  },
-];
 
 export const Extras = () => {
           const [content, setContent] = useState<any[]>([]);
