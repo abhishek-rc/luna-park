@@ -53,7 +53,7 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({
                 className="absolute inset-0 w-full h-full object-cover rounded-l-xl"
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 p-6">
               <h3 className="text-2xl font-extrabold text-[#0E5A6A]">
                 {item?.title.toUpperCase() || "Default Title"}
               </h3>
