@@ -8,7 +8,7 @@ import { ShopifyProductService } from '../../../../shopify-sdk';
 export async function GET(request: NextRequest) {
     try {
         const products = await ShopifyProductService.getAllProducts();
-        
+
         return NextResponse.json({
             success: true,
             products,

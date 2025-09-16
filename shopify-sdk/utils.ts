@@ -1,8 +1,4 @@
-import { ShopifyProduct, ShopifyCheckout } from './index';
-
-/**
- * Utility functions for Shopify integration
- */
+import { ShopifyProduct } from './index';
 
 /**
  * Format price for display
@@ -84,84 +80,6 @@ export function generateProductSlug(title: string): string {
         .trim();
 }
 
-/**
- * Validate checkout data
- */
-export function validateCheckoutData(checkout: Partial<ShopifyCheckout>): {
-    isValid: boolean;
-    errors: string[];
-} {
-    const errors: string[] = [];
-
-    if (!checkout.lineItems || checkout.lineItems.length === 0) {
-        errors.push('Checkout must have at least one line item');
-    }
-
-    if (checkout.lineItems) {
-        checkout.lineItems.forEach((item, index) => {
-            if (!item.variant.id) {
-                errors.push(`Line item ${index + 1} must have a variant ID`);
-            }
-            if (item.quantity <= 0) {
-                errors.push(`Line item ${index + 1} must have a quantity greater than 0`);
-            }
-        });
-    }
-
-    return {
-        isValid: errors.length === 0,
-        errors,
-    };
-}
-
-/**
- * Calculate checkout totals
- */
-export function calculateCheckoutTotals(checkout: ShopifyCheckout): {
-    subtotal: number;
-    tax: number;
-    total: number;
-    currencyCode: string;
-} {
-    const subtotal = parseFloat(checkout.subtotalPrice.amount);
-    const tax = parseFloat(checkout.totalTax.amount);
-    const total = parseFloat(checkout.totalPrice.amount);
-
-    return {
-        subtotal,
-        tax,
-        total,
-        currencyCode: checkout.totalPrice.currencyCode,
-    };
-}
-
-/**
- * Create line items for checkout from product and variant
- */
-export function createLineItems(
-    product: ShopifyProduct,
-    variantId: string,
-    quantity: number = 1
-): Array<{ variantId: string; quantity: number }> {
-    const variant = getProductVariant(product, variantId);
-
-    if (!variant) {
-        throw new Error(`Variant ${variantId} not found for product ${product.id}`);
-    }
-
-    if (!variant.availableForSale) {
-        throw new Error(`Variant ${variantId} is not available for sale`);
-    }
-
-    if (variant.inventoryQuantity < quantity) {
-        throw new Error(`Insufficient inventory for variant ${variantId}. Available: ${variant.inventoryQuantity}, Requested: ${quantity}`);
-    }
-
-    return [{
-        variantId: variant.id,
-        quantity,
-    }];
-}
 
 /**
  * Get product metafield value by key

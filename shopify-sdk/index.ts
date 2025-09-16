@@ -1,36 +1,39 @@
 // Simple Shopify API client using fetch directly
 
 // Environment configuration
+
 const envConfig = {
-    SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN || '',
-    SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN || '',
-    SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '',
+    SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN,
+    SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
+    SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || '2024-10',
 };
+
+
 
 // Validate Shopify configuration
 const validateShopifyConfig = () => {
     const errors = [];
-    
+
     if (!envConfig.SHOPIFY_SHOP_DOMAIN) {
         errors.push('SHOPIFY_SHOP_DOMAIN is required');
     }
-    
+
     if (!envConfig.SHOPIFY_ACCESS_TOKEN) {
         errors.push('SHOPIFY_ACCESS_TOKEN is required');
     }
-    
+
     if (!envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
         errors.push('SHOPIFY_STOREFRONT_ACCESS_TOKEN is required');
     }
-    
+
     if (errors.length > 0) {
         console.error('❌ Shopify configuration errors:');
         errors.forEach(error => console.error(`  - ${error}`));
         console.error('Please set the required environment variables in your .env.local file');
         return false;
     }
-    
+
     console.log('✅ Shopify configuration is valid');
     return true;
 };
@@ -48,33 +51,6 @@ export const getShopifyConfigStatus = () => {
         apiVersion: envConfig.SHOPIFY_API_VERSION,
         shopDomain: envConfig.SHOPIFY_SHOP_DOMAIN,
     };
-};
-
-// Test Shopify connection
-export const testShopifyConnection = async () => {
-    if (!isShopifyConfigured) {
-        return {
-            success: false,
-            error: 'Shopify is not properly configured',
-            details: getShopifyConfigStatus(),
-        };
-    }
-
-    try {
-        console.log('Testing Shopify connection...');
-        const response = await shopifyClient.getProducts();
-        return {
-            success: true,
-            message: `Successfully connected to Shopify. Found ${response.products?.length || 0} products.`,
-            productCount: response.products?.length || 0,
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            details: getShopifyConfigStatus(),
-        };
-    }
 };
 
 // REST API client for Shopify Admin API
@@ -320,79 +296,6 @@ export interface ShopifyProduct {
     }[];
 }
 
-export interface ShopifyProductVariant {
-    id: string;
-    productId: string;
-    title: string;
-    price: string;
-    compareAtPrice?: string;
-    sku?: string;
-    inventoryQuantity: number;
-    availableForSale: boolean;
-    selectedOptions: {
-        name: string;
-        value: string;
-    }[];
-}
-
-export interface ShopifyCheckout {
-    id: string;
-    webUrl: string;
-    lineItems: {
-        id: string;
-        title: string;
-        quantity: number;
-        variant: {
-            id: string;
-            title: string;
-            price: string;
-            product: {
-                id: string;
-                title: string;
-                handle: string;
-            };
-        };
-    }[];
-    totalPrice: {
-        amount: string;
-        currencyCode: string;
-    };
-    subtotalPrice: {
-        amount: string;
-        currencyCode: string;
-    };
-    totalTax: {
-        amount: string;
-        currencyCode: string;
-    };
-    shippingAddress?: {
-        firstName: string;
-        lastName: string;
-        address1: string;
-        address2?: string;
-        city: string;
-        province: string;
-        country: string;
-        zip: string;
-        phone?: string;
-    };
-    billingAddress?: {
-        firstName: string;
-        lastName: string;
-        address1: string;
-        address2?: string;
-        city: string;
-        province: string;
-        country: string;
-        zip: string;
-        phone?: string;
-    };
-    email?: string;
-    phone?: string;
-    note?: string;
-    createdAt: string;
-    updatedAt: string;
-}
 
 // Product management functions
 export class ShopifyProductService {
@@ -409,7 +312,7 @@ export class ShopifyProductService {
             console.log('Fetching products from Shopify...');
             const response = await shopifyClient.getProducts();
             console.log(`Found ${response.products?.length || 0} products`);
-            
+
             const products = await Promise.all(
                 response.products.map(async (product: any) => {
                     const metafields = await getProductMetafields(product.id);
@@ -574,414 +477,7 @@ export class ShopifyProductService {
             })),
         };
     }
-
-    /**
-     * Map GraphQL product to our interface
-     */
-    private static mapGraphQLProduct(product: any): ShopifyProduct {
-        return {
-            id: product.id,
-            title: product.title,
-            handle: product.handle,
-            description: product.description || '',
-            productType: product.productType || '',
-            vendor: product.vendor || '',
-            tags: product.tags || [],
-            status: product.status,
-            createdAt: product.createdAt,
-            updatedAt: product.updatedAt,
-            publishedAt: product.publishedAt,
-            images: product.images.edges.map((edge: any) => ({
-                id: edge.node.id,
-                url: edge.node.url,
-                altText: edge.node.altText || '',
-                width: edge.node.width || 0,
-                height: edge.node.height || 0,
-            })),
-            variants: product.variants.edges.map((edge: any) => ({
-                id: edge.node.id,
-                productId: product.id,
-                title: edge.node.title,
-                price: edge.node.price,
-                compareAtPrice: edge.node.compareAtPrice,
-                sku: edge.node.sku,
-                inventoryQuantity: edge.node.inventoryQuantity || 0,
-                availableForSale: edge.node.availableForSale,
-                selectedOptions: edge.node.selectedOptions || [],
-            })),
-            options: product.options || [],
-            metafields: product.metafields.edges.map((edge: any) => ({
-                id: edge.node.id,
-                namespace: edge.node.namespace,
-                key: edge.node.key,
-                value: edge.node.value,
-                type: edge.node.type,
-            })),
-        };
-    }
 }
 
-// Checkout management functions
-export class ShopifyCheckoutService {
-    /**
-     * Create a new checkout using GraphQL Storefront API
-     */
-    static async createCheckout(lineItems: Array<{
-        variantId: string;
-        quantity: number;
-    }>): Promise<ShopifyCheckout | null> {
-        if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, cannot create checkout');
-            return null;
-        }
-
-        try {
-            const response = await shopifyClient.createCheckout(lineItems);
-
-            if (response.data.checkoutCreate.checkoutUserErrors.length > 0) {
-                console.error('Checkout creation errors:', response.data.checkoutCreate.checkoutUserErrors);
-                return null;
-            }
-
-            return this.mapGraphQLCheckout(response.data.checkoutCreate.checkout);
-        } catch (error) {
-            console.error('Error creating checkout in Shopify:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Get checkout by ID using GraphQL Storefront API
-     */
-    static async getCheckout(checkoutId: string): Promise<ShopifyCheckout | null> {
-        if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, cannot get checkout');
-            return null;
-        }
-
-        try {
-            const query = `
-                query getCheckout($id: ID!) {
-                    node(id: $id) {
-                        ... on Checkout {
-                            id
-                            webUrl
-                            lineItems(first: 10) {
-                                edges {
-                                    node {
-                                        id
-                                        title
-                                        quantity
-                                        variant {
-                                            id
-                                            title
-                                            price {
-                                                amount
-                                                currencyCode
-                                            }
-                                            product {
-                                                id
-                                                title
-                                                handle
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            totalPrice {
-                                amount
-                                currencyCode
-                            }
-                            subtotalPrice {
-                                amount
-                                currencyCode
-                            }
-                            totalTax {
-                                amount
-                                currencyCode
-                            }
-                        }
-                    }
-                }
-            `;
-
-            const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-                },
-                body: JSON.stringify({
-                    query,
-                    variables: {
-                        id: `gid://shopify/Checkout/${checkoutId}`,
-                    },
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to get checkout: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            
-            if (data.errors) {
-                console.error('GraphQL errors:', data.errors);
-                return null;
-            }
-
-            if (!data.data.node) {
-                console.warn('Checkout not found');
-        return null;
-            }
-
-            return this.mapGraphQLCheckout(data.data.node);
-        } catch (error) {
-            console.error('Error getting checkout from Shopify:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Update checkout line items using GraphQL Storefront API
-     */
-    static async updateCheckoutLineItems(
-        checkoutId: string,
-        lineItems: Array<{
-            variantId: string;
-            quantity: number;
-        }>
-    ): Promise<ShopifyCheckout | null> {
-        if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, cannot update checkout');
-            return null;
-        }
-
-        try {
-            const mutation = `
-                mutation checkoutLineItemsUpdate($checkoutId: ID!, $lineItems: [CheckoutLineItemUpdateInput!]!) {
-                    checkoutLineItemsUpdate(checkoutId: $checkoutId, lineItems: $lineItems) {
-                        checkout {
-                            id
-                            webUrl
-                            lineItems(first: 10) {
-                                edges {
-                                    node {
-                                        id
-                                        title
-                                        quantity
-                                        variant {
-                                            id
-                                            title
-                                            price {
-                                                amount
-                                                currencyCode
-                                            }
-                                            product {
-                                                id
-                                                title
-                                                handle
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            totalPrice {
-                                amount
-                                currencyCode
-                            }
-                            subtotalPrice {
-                                amount
-                                currencyCode
-                            }
-                            totalTax {
-                                amount
-                                currencyCode
-                            }
-                        }
-                        checkoutUserErrors {
-                            field
-                            message
-                        }
-                    }
-                }
-            `;
-
-            const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-                },
-                body: JSON.stringify({
-                    query: mutation,
-                    variables: {
-                        checkoutId: `gid://shopify/Checkout/${checkoutId}`,
-                        lineItems: lineItems.map(item => ({
-                            variantId: `gid://shopify/ProductVariant/${item.variantId}`,
-                            quantity: item.quantity,
-                        })),
-                    },
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update checkout: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            
-            if (data.errors) {
-                console.error('GraphQL errors:', data.errors);
-                return null;
-            }
-
-            if (data.data.checkoutLineItemsUpdate.checkoutUserErrors.length > 0) {
-                console.error('Checkout update errors:', data.data.checkoutLineItemsUpdate.checkoutUserErrors);
-        return null;
-            }
-
-            return this.mapGraphQLCheckout(data.data.checkoutLineItemsUpdate.checkout);
-        } catch (error) {
-            console.error('Error updating checkout in Shopify:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Map GraphQL checkout to our interface
-     */
-    private static mapGraphQLCheckout(checkout: any): ShopifyCheckout {
-        return {
-            id: checkout.id.replace('gid://shopify/Checkout/', ''),
-            webUrl: checkout.webUrl,
-            lineItems: checkout.lineItems.edges.map((edge: any) => ({
-                id: edge.node.id,
-                title: edge.node.title,
-                quantity: edge.node.quantity,
-                variant: {
-                    id: edge.node.variant.id.replace('gid://shopify/ProductVariant/', ''),
-                    title: edge.node.variant.title,
-                    price: edge.node.variant.price.amount,
-                    product: {
-                        id: edge.node.variant.product.id.replace('gid://shopify/Product/', ''),
-                        title: edge.node.variant.product.title,
-                        handle: edge.node.variant.product.handle,
-                    },
-                },
-            })),
-            totalPrice: {
-                amount: checkout.totalPrice.amount,
-                currencyCode: checkout.totalPrice.currencyCode,
-            },
-            subtotalPrice: {
-                amount: checkout.subtotalPrice.amount,
-                currencyCode: checkout.subtotalPrice.currencyCode,
-            },
-            totalTax: {
-                amount: checkout.totalTax.amount,
-                currencyCode: checkout.totalTax.currencyCode,
-            },
-            shippingAddress: undefined, // Not available in basic checkout
-            billingAddress: undefined, // Not available in basic checkout
-            email: undefined, // Not available in basic checkout
-            phone: undefined, // Not available in basic checkout
-            note: undefined, // Not available in basic checkout
-            createdAt: new Date().toISOString(), // Not available in GraphQL response
-            updatedAt: new Date().toISOString(), // Not available in GraphQL response
-        };
-    }
-
-    /**
-     * Map Shopify REST API checkout to our interface
-     */
-    private static mapShopifyCheckout(checkout: any): ShopifyCheckout {
-        return {
-            id: checkout.id.toString(),
-            webUrl: checkout.web_url,
-            lineItems: checkout.line_items ? checkout.line_items.map((item: any) => ({
-                id: item.id.toString(),
-                title: item.title,
-                quantity: item.quantity,
-                variant: {
-                    id: item.variant_id.toString(),
-                    title: item.variant_title || '',
-                    price: item.price,
-                    product: {
-                        id: item.product_id.toString(),
-                        title: item.product_title || '',
-                        handle: item.product_handle || '',
-                    },
-                },
-            })) : [],
-            totalPrice: {
-                amount: checkout.total_price,
-                currencyCode: checkout.currency,
-            },
-            subtotalPrice: {
-                amount: checkout.subtotal_price,
-                currencyCode: checkout.currency,
-            },
-            totalTax: {
-                amount: checkout.total_tax,
-                currencyCode: checkout.currency,
-            },
-            shippingAddress: checkout.shipping_address ? {
-                firstName: checkout.shipping_address.first_name,
-                lastName: checkout.shipping_address.last_name,
-                address1: checkout.shipping_address.address1,
-                address2: checkout.shipping_address.address2,
-                city: checkout.shipping_address.city,
-                province: checkout.shipping_address.province,
-                country: checkout.shipping_address.country,
-                zip: checkout.shipping_address.zip,
-                phone: checkout.shipping_address.phone,
-            } : undefined,
-            billingAddress: checkout.billing_address ? {
-                firstName: checkout.billing_address.first_name,
-                lastName: checkout.billing_address.last_name,
-                address1: checkout.billing_address.address1,
-                address2: checkout.billing_address.address2,
-                city: checkout.billing_address.city,
-                province: checkout.billing_address.province,
-                country: checkout.billing_address.country,
-                zip: checkout.billing_address.zip,
-                phone: checkout.billing_address.phone,
-            } : undefined,
-            email: checkout.email,
-            phone: checkout.phone,
-            note: checkout.note,
-            createdAt: checkout.created_at,
-            updatedAt: checkout.updated_at,
-        };
-    }
-}
-
-// Product mapping service for Contentstack integration
-export class ProductMappingService {
-    /**
-     * Map Contentstack card_key to Shopify product_key
-     */
-    static async getShopifyProductsByCardKey(cardKey: string): Promise<ShopifyProduct[]> {
-        return await ShopifyProductService.getProductsByProductKey(cardKey);
-    }
-
-    /**
-     * Get all products with their mapping information
-     */
-    static async getAllMappedProducts(): Promise<Array<{
-        contentstackCardKey: string;
-        shopifyProducts: ShopifyProduct[];
-    }>> {
-        try {
-            // This would typically involve getting all products and their metafields
-            // For now, we'll return an empty array as this requires more complex implementation
-            return [];
-        } catch (error) {
-            console.error('Error getting mapped products:', error);
-            return [];
-        }
-    }
-}
 
 export { shopifyClient };

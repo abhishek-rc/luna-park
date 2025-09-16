@@ -4,13 +4,13 @@ import {
     ShopifyProduct
 } from '../typescript/layout';
 import {
-    ProductMappingService as ShopifyProductMappingService
+    ShopifyProductService,
 } from '../shopify-sdk';
 import {
     getProductKey,
-    productMatchesCardKey,
     getDefaultVariant,
     isProductAvailable,
+    productMatchesCardKey,
     formatPrice
 } from '../shopify-sdk/utils';
 
@@ -30,15 +30,8 @@ export class ProductMappingService {
                 .map(card => card.card_key)
                 .filter((key, index, array) => array.indexOf(key) === index); // Remove duplicates
 
-            // Fetch all Shopify products using API route
-            const response = await fetch('/api/shopify/products');
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || `HTTP ${response.status}`);
-            }
-
-            const allShopifyProducts: ShopifyProduct[] = data.products || [];
+            // Fetch all Shopify products
+            const allShopifyProducts = await ShopifyProductService.getAllProducts();
 
             // Create a map of card_key to Shopify products
             const cardKeyToProductsMap = new Map<string, ShopifyProduct[]>();
@@ -84,25 +77,6 @@ export class ProductMappingService {
                 ...card,
                 isAvailable: false,
             }));
-        }
-    }
-
-    /**
-     * Get Shopify products for a specific card key
-     */
-    static async getShopifyProductsForCardKey(cardKey: string): Promise<ShopifyProduct[]> {
-        try {
-            const response = await fetch(`/api/shopify/products/by-key?cardKey=${encodeURIComponent(cardKey)}`);
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || `HTTP ${response.status}`);
-            }
-
-            return data.products || [];
-        } catch (error) {
-            console.error(`Error fetching Shopify products for card key ${cardKey}:`, error);
-            return [];
         }
     }
 
