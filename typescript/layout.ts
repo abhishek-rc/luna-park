@@ -348,6 +348,7 @@ export type HomepageTicketCard = {
     _metadata: {
         uid: string;
     };
+    card_key: string;
 };
 
 export type HomepageTicketGroup = {
@@ -384,3 +385,119 @@ export type HomepageEntry = {
 };
 
 export type HomepageResponse = HomepageEntry[];
+
+// Shopify Integration Types
+export type ShopifyProduct = {
+    id: string;
+    title: string;
+    handle: string;
+    description: string;
+    productType: string;
+    vendor: string;
+    tags: string[];
+    status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    images: {
+        id: string;
+        url: string;
+        altText: string;
+        width: number;
+        height: number;
+    }[];
+    variants: {
+        id: string;
+        title: string;
+        price: string;
+        compareAtPrice?: string;
+        sku?: string;
+        inventoryQuantity: number;
+        availableForSale: boolean;
+        selectedOptions: {
+            name: string;
+            value: string;
+        }[];
+    }[];
+    options: {
+        id: string;
+        name: string;
+        values: string[];
+    }[];
+    metafields: {
+        id: string;
+        namespace: string;
+        key: string;
+        value: string;
+        type: string;
+    }[];
+};
+
+export type ShopifyCheckout = {
+    id: string;
+    webUrl: string;
+    lineItems: {
+        id: string;
+        title: string;
+        quantity: number;
+        variant: {
+            id: string;
+            title: string;
+            price: string;
+            product: {
+                id: string;
+                title: string;
+                handle: string;
+            };
+        };
+    }[];
+    totalPrice: {
+        amount: string;
+        currencyCode: string;
+    };
+    subtotalPrice: {
+        amount: string;
+        currencyCode: string;
+    };
+    totalTax: {
+        amount: string;
+        currencyCode: string;
+    };
+    shippingAddress?: {
+        firstName: string;
+        lastName: string;
+        address1: string;
+        address2?: string;
+        city: string;
+        province: string;
+        country: string;
+        zip: string;
+        phone?: string;
+    };
+    billingAddress?: {
+        firstName: string;
+        lastName: string;
+        address1: string;
+        address2?: string;
+        city: string;
+        province: string;
+        country: string;
+        zip: string;
+        phone?: string;
+    };
+    email?: string;
+    phone?: string;
+    note?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+// Enhanced HomepageTicketCard with Shopify integration
+export type EnhancedHomepageTicketCard = HomepageTicketCard & {
+    shopifyProduct?: ShopifyProduct;
+    shopifyVariants?: ShopifyProduct['variants'];
+    isAvailable?: boolean;
+    price?: string;
+    compareAtPrice?: string;
+    inventoryQuantity?: number;
+};

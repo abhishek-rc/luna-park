@@ -11,6 +11,9 @@
   "dependencies": {
     "@contentstack/live-preview-utils": "^4.0.1",
     "@contentstack/utils": "^1.4.2",
+    "@shopify/admin-api-client": "^1.1.1",
+    "@shopify/shopify-api": "^11.14.1",
+    "@shopify/shopify-app-session-storage-memory": "^4.0.20",
     "contentstack": "^3.26.2",
     "html-react-parser": "^5.2.6",
     "moment": "^2.30.1",
