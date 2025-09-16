@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import {
-    ShopifyCheckoutService,
     ShopifyCheckout,
     ShopifyProduct
 } from '../shopify-sdk';
@@ -31,10 +30,22 @@ export function useShopifyCheckout(): UseShopifyCheckoutReturn {
         setError(null);
 
         try {
-            const newCheckout = await ShopifyCheckoutService.createCheckout(lineItems);
+            const response = await fetch('/api/shopify/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ lineItems }),
+            });
 
-            if (newCheckout) {
-                setCheckout(newCheckout);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            if (data.checkout) {
+                setCheckout(data.checkout);
                 return true;
             } else {
                 setError('Failed to create checkout');
@@ -60,13 +71,22 @@ export function useShopifyCheckout(): UseShopifyCheckoutReturn {
         setError(null);
 
         try {
-            const updatedCheckout = await ShopifyCheckoutService.updateCheckoutLineItems(
-                checkout.id,
-                lineItems
-            );
+            const response = await fetch(`/api/shopify/checkout/${checkout.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ lineItems }),
+            });
 
-            if (updatedCheckout) {
-                setCheckout(updatedCheckout);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            if (data.checkout) {
+                setCheckout(data.checkout);
                 return true;
             } else {
                 setError('Failed to update checkout');
@@ -87,10 +107,15 @@ export function useShopifyCheckout(): UseShopifyCheckoutReturn {
         setError(null);
 
         try {
-            const fetchedCheckout = await ShopifyCheckoutService.getCheckout(checkoutId);
+            const response = await fetch(`/api/shopify/checkout/${checkoutId}`);
+            const data = await response.json();
 
-            if (fetchedCheckout) {
-                setCheckout(fetchedCheckout);
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            if (data.checkout) {
+                setCheckout(data.checkout);
                 return true;
             } else {
                 setError('Checkout not found');

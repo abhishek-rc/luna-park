@@ -4,7 +4,6 @@ import {
     ShopifyProduct
 } from '../typescript/layout';
 import {
-    ShopifyProductService,
     ProductMappingService as ShopifyProductMappingService
 } from '../shopify-sdk';
 import {
@@ -31,8 +30,15 @@ export class ProductMappingService {
                 .map(card => card.card_key)
                 .filter((key, index, array) => array.indexOf(key) === index); // Remove duplicates
 
-            // Fetch all Shopify products
-            const allShopifyProducts = await ShopifyProductService.getAllProducts();
+            // Fetch all Shopify products using API route
+            const response = await fetch('/api/shopify/products');
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            const allShopifyProducts: ShopifyProduct[] = data.products || [];
 
             // Create a map of card_key to Shopify products
             const cardKeyToProductsMap = new Map<string, ShopifyProduct[]>();
@@ -86,7 +92,14 @@ export class ProductMappingService {
      */
     static async getShopifyProductsForCardKey(cardKey: string): Promise<ShopifyProduct[]> {
         try {
-            return await ShopifyProductMappingService.getShopifyProductsByCardKey(cardKey);
+            const response = await fetch(`/api/shopify/products/by-key?cardKey=${encodeURIComponent(cardKey)}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            return data.products || [];
         } catch (error) {
             console.error(`Error fetching Shopify products for card key ${cardKey}:`, error);
             return [];

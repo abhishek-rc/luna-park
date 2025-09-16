@@ -39,8 +39,6 @@ export default function TicketBookingSection() {
         enhanceCards();
     }, [homepageData]);
 
-    console.log("enhancedCards>>>>>>>>>>>>", enhancedCards);
-
     const handleAddToCart = async (card: EnhancedHomepageTicketCard) => {
         if (!card.shopifyProduct || !card.isAvailable) {
             alert('This product is not available for purchase');

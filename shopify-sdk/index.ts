@@ -4,13 +4,87 @@
 const envConfig = {
     SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN || '',
     SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN || '',
+    SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '',
     SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || '2024-10',
+};
+
+// Validate Shopify configuration
+const validateShopifyConfig = () => {
+    const errors = [];
+    
+    if (!envConfig.SHOPIFY_SHOP_DOMAIN) {
+        errors.push('SHOPIFY_SHOP_DOMAIN is required');
+    }
+    
+    if (!envConfig.SHOPIFY_ACCESS_TOKEN) {
+        errors.push('SHOPIFY_ACCESS_TOKEN is required');
+    }
+    
+    if (!envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
+        errors.push('SHOPIFY_STOREFRONT_ACCESS_TOKEN is required');
+    }
+    
+    if (errors.length > 0) {
+        console.error('❌ Shopify configuration errors:');
+        errors.forEach(error => console.error(`  - ${error}`));
+        console.error('Please set the required environment variables in your .env.local file');
+        return false;
+    }
+    
+    console.log('✅ Shopify configuration is valid');
+    return true;
+};
+
+// Check if configuration is valid
+const isShopifyConfigured = validateShopifyConfig();
+
+// Export configuration status for debugging
+export const getShopifyConfigStatus = () => {
+    return {
+        isConfigured: isShopifyConfigured,
+        hasShopDomain: !!envConfig.SHOPIFY_SHOP_DOMAIN,
+        hasAccessToken: !!envConfig.SHOPIFY_ACCESS_TOKEN,
+        hasStorefrontToken: !!envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+        apiVersion: envConfig.SHOPIFY_API_VERSION,
+        shopDomain: envConfig.SHOPIFY_SHOP_DOMAIN,
+    };
+};
+
+// Test Shopify connection
+export const testShopifyConnection = async () => {
+    if (!isShopifyConfigured) {
+        return {
+            success: false,
+            error: 'Shopify is not properly configured',
+            details: getShopifyConfigStatus(),
+        };
+    }
+
+    try {
+        console.log('Testing Shopify connection...');
+        const response = await shopifyClient.getProducts();
+        return {
+            success: true,
+            message: `Successfully connected to Shopify. Found ${response.products?.length || 0} products.`,
+            productCount: response.products?.length || 0,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            details: getShopifyConfigStatus(),
+        };
+    }
 };
 
 // REST API client for Shopify Admin API
 const shopifyClient = {
     // Get all products
     getProducts: async () => {
+        if (!isShopifyConfigured) {
+            throw new Error('Shopify is not properly configured. Please check your environment variables.');
+        }
+
         const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products.json`, {
             headers: {
                 'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
@@ -19,7 +93,13 @@ const shopifyClient = {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch products: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Shopify API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
         }
 
         return response.json();
@@ -27,6 +107,10 @@ const shopifyClient = {
 
     // Get product by ID
     getProduct: async (productId: string) => {
+        if (!isShopifyConfigured) {
+            throw new Error('Shopify is not properly configured. Please check your environment variables.');
+        }
+
         const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products/${productId}.json`, {
             headers: {
                 'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
@@ -35,7 +119,13 @@ const shopifyClient = {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch product: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Shopify API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to fetch product: ${response.status} ${response.statusText}`);
         }
 
         return response.json();
@@ -43,6 +133,10 @@ const shopifyClient = {
 
     // Search products
     searchProducts: async (query: string) => {
+        if (!isShopifyConfigured) {
+            throw new Error('Shopify is not properly configured. Please check your environment variables.');
+        }
+
         const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products.json?title=${encodeURIComponent(query)}`, {
             headers: {
                 'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
@@ -51,7 +145,13 @@ const shopifyClient = {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to search products: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Shopify API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to search products: ${response.status} ${response.statusText}`);
         }
 
         return response.json();
@@ -59,6 +159,10 @@ const shopifyClient = {
 
     // Create checkout (using Storefront API)
     createCheckout: async (lineItems: Array<{ variantId: string; quantity: number }>) => {
+        if (!isShopifyConfigured) {
+            throw new Error('Shopify is not properly configured. Please check your environment variables.');
+        }
+
         const mutation = `
             mutation checkoutCreate($input: CheckoutCreateInput!) {
                 checkoutCreate(input: $input) {
@@ -112,7 +216,7 @@ const shopifyClient = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
+                'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
             },
             body: JSON.stringify({
                 query: mutation,
@@ -128,7 +232,13 @@ const shopifyClient = {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to create checkout: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Shopify Storefront API Error:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`Failed to create checkout: ${response.status} ${response.statusText}`);
         }
 
         return response.json();
@@ -137,6 +247,11 @@ const shopifyClient = {
 
 // Helper function to get product metafields
 const getProductMetafields = async (productId: string) => {
+    if (!isShopifyConfigured) {
+        console.warn('Shopify is not configured, returning empty metafields');
+        return [];
+    }
+
     try {
         const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products/${productId}/metafields.json`, {
             headers: {
@@ -146,6 +261,7 @@ const getProductMetafields = async (productId: string) => {
         });
 
         if (!response.ok) {
+            console.warn(`Failed to fetch metafields for product ${productId}: ${response.status} ${response.statusText}`);
             return [];
         }
 
@@ -284,8 +400,16 @@ export class ShopifyProductService {
      * Get all products from Shopify
      */
     static async getAllProducts(): Promise<ShopifyProduct[]> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, returning empty products array');
+            return [];
+        }
+
         try {
+            console.log('Fetching products from Shopify...');
             const response = await shopifyClient.getProducts();
+            console.log(`Found ${response.products?.length || 0} products`);
+            
             const products = await Promise.all(
                 response.products.map(async (product: any) => {
                     const metafields = await getProductMetafields(product.id);
@@ -295,7 +419,7 @@ export class ShopifyProductService {
             return products;
         } catch (error) {
             console.error('Error fetching products from Shopify:', error);
-            throw new Error('Failed to fetch products from Shopify');
+            throw new Error(`Failed to fetch products from Shopify: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -303,6 +427,11 @@ export class ShopifyProductService {
      * Get product by ID
      */
     static async getProductById(productId: string): Promise<ShopifyProduct | null> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, returning null');
+            return null;
+        }
+
         try {
             const response = await shopifyClient.getProduct(productId);
             const metafields = await getProductMetafields(productId);
@@ -317,6 +446,11 @@ export class ShopifyProductService {
      * Get product by handle
      */
     static async getProductByHandle(handle: string): Promise<ShopifyProduct | null> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, returning null');
+            return null;
+        }
+
         try {
             const response = await shopifyClient.searchProducts(handle);
             if (response.products.length > 0) {
@@ -335,6 +469,11 @@ export class ShopifyProductService {
      * Get products by product_key metafield (matching card_key from Contentstack)
      */
     static async getProductsByProductKey(productKey: string): Promise<ShopifyProduct[]> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, returning empty products array');
+            return [];
+        }
+
         try {
             // Get all products and filter by metafield
             const response = await shopifyClient.getProducts();
@@ -364,6 +503,11 @@ export class ShopifyProductService {
      * Search products by title or tags
      */
     static async searchProducts(query: string): Promise<ShopifyProduct[]> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, returning empty products array');
+            return [];
+        }
+
         try {
             const response = await shopifyClient.searchProducts(query);
             const products = await Promise.all(
@@ -486,6 +630,11 @@ export class ShopifyCheckoutService {
         variantId: string;
         quantity: number;
     }>): Promise<ShopifyCheckout | null> {
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, cannot create checkout');
+            return null;
+        }
+
         try {
             const response = await shopifyClient.createCheckout(lineItems);
 
@@ -502,16 +651,99 @@ export class ShopifyCheckoutService {
     }
 
     /**
-     * Get checkout by ID (simplified - returns null for now)
+     * Get checkout by ID using GraphQL Storefront API
      */
     static async getCheckout(checkoutId: string): Promise<ShopifyCheckout | null> {
-        // For now, we'll return null as getting checkout by ID requires more complex implementation
-        console.warn('getCheckout not implemented yet');
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, cannot get checkout');
+            return null;
+        }
+
+        try {
+            const query = `
+                query getCheckout($id: ID!) {
+                    node(id: $id) {
+                        ... on Checkout {
+                            id
+                            webUrl
+                            lineItems(first: 10) {
+                                edges {
+                                    node {
+                                        id
+                                        title
+                                        quantity
+                                        variant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                                handle
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            totalPrice {
+                                amount
+                                currencyCode
+                            }
+                            subtotalPrice {
+                                amount
+                                currencyCode
+                            }
+                            totalTax {
+                                amount
+                                currencyCode
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+                },
+                body: JSON.stringify({
+                    query,
+                    variables: {
+                        id: `gid://shopify/Checkout/${checkoutId}`,
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to get checkout: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.errors) {
+                console.error('GraphQL errors:', data.errors);
+                return null;
+            }
+
+            if (!data.data.node) {
+                console.warn('Checkout not found');
         return null;
+            }
+
+            return this.mapGraphQLCheckout(data.data.node);
+        } catch (error) {
+            console.error('Error getting checkout from Shopify:', error);
+            return null;
+        }
     }
 
     /**
-     * Update checkout line items (simplified - returns null for now)
+     * Update checkout line items using GraphQL Storefront API
      */
     static async updateCheckoutLineItems(
         checkoutId: string,
@@ -520,9 +752,100 @@ export class ShopifyCheckoutService {
             quantity: number;
         }>
     ): Promise<ShopifyCheckout | null> {
-        // For now, we'll return null as updating checkout requires more complex implementation
-        console.warn('updateCheckoutLineItems not implemented yet');
+        if (!isShopifyConfigured) {
+            console.warn('Shopify is not configured, cannot update checkout');
+            return null;
+        }
+
+        try {
+            const mutation = `
+                mutation checkoutLineItemsUpdate($checkoutId: ID!, $lineItems: [CheckoutLineItemUpdateInput!]!) {
+                    checkoutLineItemsUpdate(checkoutId: $checkoutId, lineItems: $lineItems) {
+                        checkout {
+                            id
+                            webUrl
+                            lineItems(first: 10) {
+                                edges {
+                                    node {
+                                        id
+                                        title
+                                        quantity
+                                        variant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                                handle
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            totalPrice {
+                                amount
+                                currencyCode
+                            }
+                            subtotalPrice {
+                                amount
+                                currencyCode
+                            }
+                            totalTax {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        checkoutUserErrors {
+                            field
+                            message
+                        }
+                    }
+                }
+            `;
+
+            const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+                },
+                body: JSON.stringify({
+                    query: mutation,
+                    variables: {
+                        checkoutId: `gid://shopify/Checkout/${checkoutId}`,
+                        lineItems: lineItems.map(item => ({
+                            variantId: `gid://shopify/ProductVariant/${item.variantId}`,
+                            quantity: item.quantity,
+                        })),
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to update checkout: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.errors) {
+                console.error('GraphQL errors:', data.errors);
+                return null;
+            }
+
+            if (data.data.checkoutLineItemsUpdate.checkoutUserErrors.length > 0) {
+                console.error('Checkout update errors:', data.data.checkoutLineItemsUpdate.checkoutUserErrors);
         return null;
+            }
+
+            return this.mapGraphQLCheckout(data.data.checkoutLineItemsUpdate.checkout);
+        } catch (error) {
+            console.error('Error updating checkout in Shopify:', error);
+            return null;
+        }
     }
 
     /**

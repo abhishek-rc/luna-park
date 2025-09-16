@@ -1,12 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-    ShopifyProductService,
-    ProductMappingService,
-    ShopifyProduct
-} from '../shopify-sdk';
-import { filterProductsByCardKey, sortProducts } from '../shopify-sdk/utils';
+import { ShopifyProduct } from '../shopify-sdk';
+import { sortProducts } from '../shopify-sdk/utils';
 
 interface UseShopifyProductsOptions {
     cardKey?: string;
@@ -44,15 +40,24 @@ export function useShopifyProducts(options: UseShopifyProductsOptions = {}): Use
         setError(null);
 
         try {
-            let fetchedProducts: ShopifyProduct[] = [];
+            let response: Response;
+            let data: any;
 
             if (cardKey) {
                 // Fetch products by card key (mapped to product_key in Shopify)
-                fetchedProducts = await ProductMappingService.getShopifyProductsByCardKey(cardKey);
+                response = await fetch(`/api/shopify/products/by-key?cardKey=${encodeURIComponent(cardKey)}`);
+                data = await response.json();
             } else {
                 // Fetch all products
-                fetchedProducts = await ShopifyProductService.getAllProducts();
+                response = await fetch('/api/shopify/products');
+                data = await response.json();
             }
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            const fetchedProducts: ShopifyProduct[] = data.products || [];
 
             // Sort products
             const sortedProducts = sortProducts(fetchedProducts, sortBy, sortOrder);
@@ -101,8 +106,14 @@ export function useShopifyProduct(productId: string | null) {
         setError(null);
 
         try {
-            const fetchedProduct = await ShopifyProductService.getProductById(productId);
-            setProduct(fetchedProduct);
+            const response = await fetch(`/api/shopify/products/${productId}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            setProduct(data.product);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to fetch product';
             setError(errorMessage);
@@ -142,8 +153,14 @@ export function useShopifyProductSearch(query: string, enabled: boolean = true) 
         setError(null);
 
         try {
-            const searchResults = await ShopifyProductService.searchProducts(query);
-            setProducts(searchResults);
+            const response = await fetch(`/api/shopify/products/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            setProducts(data.products || []);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to search products';
             setError(errorMessage);
