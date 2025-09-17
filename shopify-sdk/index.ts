@@ -6,7 +6,7 @@ const envConfig = {
     SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN,
     SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
     SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2024-10",
+    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2024-01",
 };
 
 // Validate Shopify configuration
@@ -641,8 +641,9 @@ export class ShopifyProductService {
         }
     }
 
+
     /**
-     * Create checkout using Storefront API
+     * Create checkout using Storefront API (using cartCreate as fallback)
      */
     static async createCheckout(
         lineItems: Array<{ variantId: string; quantity: number }>
@@ -659,7 +660,93 @@ export class ShopifyProductService {
         }
 
         try {
-            const mutation = `
+            // Try cartCreate first (newer API), then fallback to checkoutCreate
+            let hasCartCreate = true;
+            let hasCheckoutCreate = true;
+            
+            // Try cartCreate first (newer API) if available
+            if (hasCartCreate) {
+                const cartMutation = `
+                mutation cartCreate($input: CartInput!) {
+                    cartCreate(input: $input) {
+                        cart {
+                            id
+                            checkoutUrl
+                            lines(first: 10) {
+                                edges {
+                                    node {
+                                        id
+                                        quantity
+                                        merchandise {
+                                            ... on ProductVariant {
+                                                id
+                                                title
+                                                price {
+                                                    amount
+                                                    currencyCode
+                                                }
+                                                product {
+                                                    id
+                                                    title
+                                                    handle
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            cost {
+                                totalAmount {
+                                    amount
+                                    currencyCode
+                                }
+                                subtotalAmount {
+                                    amount
+                                    currencyCode
+                                }
+                                totalTaxAmount {
+                                    amount
+                                    currencyCode
+                                }
+                            }
+                        }
+                        userErrors {
+                            field
+                            message
+                        }
+                    }
+                }
+            `;
+
+                const cartData = await shopifyGraphQLClient.query(cartMutation, {
+                    input: {
+                        lines: lineItems.map((item) => ({
+                            merchandiseId: `gid://shopify/ProductVariant/${item.variantId}`,
+                            quantity: item.quantity,
+                        })),
+                    },
+                });
+
+                if (cartData?.cartCreate?.userErrors?.length > 0) {
+                    const errors = cartData.cartCreate.userErrors;
+                    return {
+                        success: false,
+                        error: errors.map((e: any) => e.message).join(", "),
+                    };
+                }
+
+                const cart = cartData?.cartCreate?.cart;
+                if (cart && cart.checkoutUrl) {
+                    return {
+                        success: true,
+                        checkoutUrl: cart.checkoutUrl,
+                    };
+                }
+            }
+
+            // Fallback: Try the old checkoutCreate mutation if available
+            if (hasCheckoutCreate) {
+                const checkoutMutation = `
                 mutation checkoutCreate($input: CheckoutCreateInput!) {
                     checkoutCreate(input: $input) {
                         checkout {
@@ -708,34 +795,36 @@ export class ShopifyProductService {
                 }
             `;
 
-            const data = await shopifyGraphQLClient.query(mutation, {
-                input: {
-                    lineItems: lineItems.map((item) => ({
-                        variantId: `gid://shopify/ProductVariant/${item.variantId}`,
-                        quantity: item.quantity,
-                    })),
-                },
-            });
+                const checkoutData = await shopifyGraphQLClient.query(checkoutMutation, {
+                    input: {
+                        lineItems: lineItems.map((item) => ({
+                            variantId: `gid://shopify/ProductVariant/${item.variantId}`,
+                            quantity: item.quantity,
+                        })),
+                    },
+                });
 
-            if (data?.checkoutCreate?.checkoutUserErrors?.length > 0) {
-                const errors = data.checkoutCreate.checkoutUserErrors;
-                return {
-                    success: false,
-                    error: errors.map((e: any) => e.message).join(", "),
-                };
+                if (checkoutData?.checkoutCreate?.checkoutUserErrors?.length > 0) {
+                    const errors = checkoutData.checkoutCreate.checkoutUserErrors;
+                    return {
+                        success: false,
+                        error: errors.map((e: any) => e.message).join(", "),
+                    };
+                }
+
+                const checkout = checkoutData?.checkoutCreate?.checkout;
+                if (checkout) {
+                    return {
+                        success: true,
+                        checkoutUrl: checkout.webUrl,
+                    };
+                }
             }
 
-            const checkout = data?.checkoutCreate?.checkout;
-            if (!checkout) {
-                return {
-                    success: false,
-                    error: "Failed to create checkout",
-                };
-            }
-
+            // If neither mutation worked, return an error
             return {
-                success: true,
-                checkoutUrl: checkout.webUrl,
+                success: false,
+                error: "Failed to create checkout or cart",
             };
         } catch (error) {
             console.error("Error creating checkout:", error);

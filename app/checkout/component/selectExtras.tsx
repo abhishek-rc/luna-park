@@ -18,7 +18,6 @@ export const Extras = () => {
       useEffect(() => {
         fetchContent("checkoutlogo");
       }, []);
-      console.log("contentExtras",content);
   return (
     <section className="space-y-10">
       {/* Immersive experiences */}

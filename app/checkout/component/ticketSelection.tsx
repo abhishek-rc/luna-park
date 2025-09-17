@@ -6,10 +6,6 @@ import { ShopifyProduct } from "../../../shopify-sdk";
 interface TicektSelectionProps {
   setPassOpen: any;
   passOpen: any;
-  redGreenPass: number;
-  setYellowPass: (value: number) => void;
-  yellowPass: number;
-  setRedGreenPass: (value: number) => void;
   totalPrice: number | string;
   selectedVariants: { [key: string]: { variant: any; quantity: number } };
   setSelectedVariants: (variants: { [key: string]: { variant: any; quantity: number } }) => void;
@@ -19,10 +15,6 @@ interface TicektSelectionProps {
 const TicketSelection: React.FC<TicektSelectionProps> = ({
   setPassOpen,
   passOpen,
-  setYellowPass,
-  yellowPass,
-  setRedGreenPass,
-  redGreenPass,
   selectedVariants,
   setSelectedVariants,
   setContentData,
@@ -61,10 +53,8 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({
     if (!unlimitedRidesProduct) return [];
     const variants = unlimitedRidesProduct.variants.filter(variant => {
       const variantTitle = variant.title.toUpperCase();
-      console.log(`Checking variant: ${variant.title} for type: ${type}`);
       return variantTitle.includes(type);
     });
-    console.log(`Found ${variants.length} variants for type ${type}:`, variants);
     return variants;
   };
 
