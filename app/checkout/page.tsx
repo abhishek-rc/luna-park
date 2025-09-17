@@ -16,19 +16,48 @@ type Day = {
 };
 
 export default function TicketBooking() {
-  const [yellowPass, setYellowPass] = useState(0);
-  const [redGreenPass, setRedGreenPass] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const totalTickets = yellowPass + redGreenPass;
-  const totalPrice = totalTickets > 0 ? `$${totalTickets * 50}` : "TBC";
   const [passOpen, setPassOpen] = useState<number | null>(null);
   const [ticketInfo, setTicektInfo] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: { variant: any; quantity: number } }>({});
+  const [contentData, setContentData] = useState<any[]>([]);
+
+  // Calculate totals from selected variants
+  const calculateTotals = () => {
+    let yellowPass = 0;
+    let redGreenPass = 0;
+    let totalPrice = 0;
+
+    Object.values(selectedVariants).forEach(({ variant, quantity }) => {
+      if (variant && quantity > 0) {
+        const variantTitle = variant.title.toUpperCase();
+        const price = parseFloat(variant.price);
+        
+        if (variantTitle.includes('Y')) {
+          yellowPass += quantity;
+        } else if (variantTitle.includes('R/G') || variantTitle.includes('RED/GREEN')) {
+          redGreenPass += quantity;
+        }
+        
+        totalPrice += price * quantity;
+      }
+    });
+
+    return {
+      yellowPass,
+      redGreenPass,
+      totalTickets: yellowPass + redGreenPass,
+      totalPrice: totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : "TBC"
+    };
+  };
+
+  const { yellowPass, redGreenPass, totalTickets, totalPrice } = calculateTotals();
+
   const ticketQuantities = {
     yellow: yellowPass,
     redGreen: redGreenPass,
   };
-
 
   const [ticketPrices, setTicketPrices] = useState<{
     yellow: number;
@@ -71,15 +100,14 @@ export default function TicketBooking() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 px-10">
-    
+
       <div className="flex justify-center space-x-8 text-sm font-semibold text-gray-600 mb-8">
         <span className="text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6">
           01. SELECT TICKETS
         </span>
         <span
-          className={`${
-            ticketInfo ? "text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6" : "tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6"
-          }`}
+          className={`${ticketInfo ? "text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6" : "tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6"
+            }`}
         >
           02. TICKETS INFO
         </span>
@@ -92,10 +120,9 @@ export default function TicketBooking() {
             setPassOpen={setPassOpen}
             totalPrice={totalPrice}
             passOpen={passOpen}
-            setYellowPass={setYellowPass}
-            yellowPass={yellowPass}
-            setRedGreenPass={setRedGreenPass}
-            redGreenPass={redGreenPass}
+            selectedVariants={selectedVariants}
+            setSelectedVariants={setSelectedVariants}
+            setContentData={setContentData}
           />
         )}
         {ticketInfo && (
@@ -109,6 +136,7 @@ export default function TicketBooking() {
             setCurrentStep={setCurrentStep}
             onDateChange={onDateChange}
             ticketPrices={ticketPrices}
+            selectedVariants={selectedVariants}
           />
         )}
         <Summary
@@ -118,6 +146,8 @@ export default function TicketBooking() {
           totalPrice={totalPrice}
           setTicektInfo={setTicektInfo}
           selectedDate={selectedDate}
+          currentStep={currentStep}
+          selectedVariants={selectedVariants}
         />
       </div>
       <CheckoutFooter />

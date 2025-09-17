@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import LunaParkHeader from "../components/LunaParkHeader";
+import Cart from "../components/Cart";
+import { CartProvider } from "../contexts/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,8 +37,11 @@ export default function RootLayout({
       <body
         className={` ${brevia.variable} antialiased`}
       >
-        <LunaParkHeader />
-        {children}
+        <CartProvider>
+          <LunaParkHeader />
+          {children}
+          <Cart />
+        </CartProvider>
       </body>
     </html>
   );

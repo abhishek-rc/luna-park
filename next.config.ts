@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     CONTENTSTACK_APP_HOST: process.env.CONTENTSTACK_APP_HOST || "app.contentstack.com",
     CONTENTSTACK_LIVE_PREVIEW: process.env.CONTENTSTACK_LIVE_PREVIEW || "false",
     CONTENTSTACK_LIVE_EDIT_TAGS: process.env.CONTENTSTACK_LIVE_EDIT_TAGS || "false",
+    SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN,
+    SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
+    SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2024-10",
   },
   images: {
     remotePatterns: [
@@ -21,6 +25,18 @@ const nextConfig: NextConfig = {
         hostname: 'images.contentstack.io',
         port: '',
         pathname: '/v3/assets/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shopify.com',
+        port: '',
+        pathname: '/s/files/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.myshopify.com',
+        port: '',
+        pathname: '/cdn/shop/**',
       },
     ],
   },

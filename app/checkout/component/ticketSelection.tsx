@@ -1,37 +1,75 @@
 import React, { useEffect, useState } from "react";
 import { getContentByType } from "../../../helper";
+import { useShopifyProducts } from "../../../hooks/useShopifyProducts";
+import { ShopifyProduct } from "../../../shopify-sdk";
 
 interface TicektSelectionProps {
   setPassOpen: any;
   passOpen: any;
-  redGreenPass: number;
-  setYellowPass: (value: number) => void;
-  yellowPass: number;
-  setRedGreenPass: (value: number) => void;
   totalPrice: number | string;
+  selectedVariants: { [key: string]: { variant: any; quantity: number } };
+  setSelectedVariants: (variants: { [key: string]: { variant: any; quantity: number } }) => void;
+  setContentData: (data: any[]) => void;
 }
 
 const TicketSelection: React.FC<TicektSelectionProps> = ({
   setPassOpen,
   passOpen,
-  setYellowPass,
-  yellowPass,
-  setRedGreenPass,
-  redGreenPass,
+  selectedVariants,
+  setSelectedVariants,
+  setContentData,
 }) => {
   const [content, setContent] = useState<any[]>([]);
+  const { products, loading: productsLoading } = useShopifyProducts();
+  const [unlimitedRidesProduct, setUnlimitedRidesProduct] = useState<ShopifyProduct | null>(null);
+
   const fetchContent = async (type: string) => {
     try {
       const response = await getContentByType(type);
       setContent(response || []);
+      setContentData(response || []);
     } catch (err) {
       console.error("Error fetching content:", err);
     } finally {
     }
   };
+
   useEffect(() => {
     fetchContent("riderpass");
   }, []);
+
+  // Find the Unlimited Rides Pass product from Shopify
+  useEffect(() => {
+    if (products.length > 0) {
+      const unlimitedRides = products.find(product =>
+        product.title.toLowerCase().includes('unlimited rides pass')
+      );
+      setUnlimitedRidesProduct(unlimitedRides || null);
+    }
+  }, [products]);
+
+  // Get variants for Y and R/G
+  const getVariantsByType = (type: 'Y' | 'R/G') => {
+    if (!unlimitedRidesProduct) return [];
+    const variants = unlimitedRidesProduct.variants.filter(variant => {
+      const variantTitle = variant.title.toUpperCase();
+      return variantTitle.includes(type);
+    });
+    return variants;
+  };
+
+  const yellowVariants = getVariantsByType('Y');
+  const redGreenVariants = getVariantsByType('R/G');
+
+  const updateVariantQuantity = (variantId: string, quantity: number, type: 'yellow' | 'redGreen') => {
+    const variant = type === 'yellow' ? yellowVariants.find(v => v.id === variantId) : redGreenVariants.find(v => v.id === variantId);
+    if (variant) {
+      setSelectedVariants({
+        ...selectedVariants,
+        [variantId]: { variant, quantity }
+      });
+    }
+  };
   return (
     <>
       {" "}
@@ -77,68 +115,84 @@ const TicketSelection: React.FC<TicektSelectionProps> = ({
 
               {passOpen === index && (
                 <div className="mt-4 space-y-4">
-                  {/* Yellow Pass */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-[#0E5A6A]">
-                        {item?.select_1_title}
-                      </p>
-                      <p className="text-sm text-[#5C7C86]">
-                        {item.select2description}
-                      </p>
+                  {/* Yellow Pass Variants */}
+                  {yellowVariants.map((variant) => (
+                    <div key={variant.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-semibold text-[#0E5A6A]">
+                          {item?.select_1_title}
+                        </p>
+                        <p className="text-sm text-[#5C7C86]">
+                          {item.select2description}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            const currentQuantity = selectedVariants[variant.id]?.quantity || 0;
+                            updateVariantQuantity(variant.id, Math.max(0, currentQuantity - 1), 'yellow');
+                          }}
+                          className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
+                        >
+                          -
+                        </button>
+                        <span className="text-[#5C7C86]">
+                          {selectedVariants[variant.id]?.quantity || 0}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const currentQuantity = selectedVariants[variant.id]?.quantity || 0;
+                            updateVariantQuantity(variant.id, currentQuantity + 1, 'yellow');
+                          }}
+                          className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          setYellowPass(Math.max(0, yellowPass - 1))
-                        }
-                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
-                      >
-                        -
-                      </button>
-                      <span className="text-[#5C7C86]">{yellowPass}</span>
-                      <button
-                        onClick={() => setYellowPass(yellowPass + 1)}
-                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                  ))}
 
-                  {/* Red/Green Pass */}
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-[#0E5A6A]">
-                        {content[0].select2_title}
-                      </p>
-                      <p className="text-sm text-[#5C7C86]">
-                        {content[0].select2description}
-                      </p>
+                  {/* Red/Green Pass Variants */}
+                  {redGreenVariants.map((variant) => (
+                    <div key={variant.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-semibold text-[#0E5A6A]">
+                          {content[0].select2_title}
+                        </p>
+                        <p className="text-sm text-[#5C7C86]">
+                          {content[0].select2description}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            const currentQuantity = selectedVariants[variant.id]?.quantity || 0;
+                            updateVariantQuantity(variant.id, Math.max(0, currentQuantity - 1), 'redGreen');
+                          }}
+                          className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
+                        >
+                          -
+                        </button>
+                        <span className="text-[#5C7C86]">
+                          {selectedVariants[variant.id]?.quantity || 0}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const currentQuantity = selectedVariants[variant.id]?.quantity || 0;
+                            updateVariantQuantity(variant.id, currentQuantity + 1, 'redGreen');
+                          }}
+                          className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          setRedGreenPass(Math.max(0, redGreenPass - 1))
-                        }
-                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
-                      >
-                        -
-                      </button>
-                      <span className="text-[#5C7C86]">{redGreenPass}</span>
-                      <button
-                        onClick={() => setRedGreenPass(redGreenPass + 1)}
-                        className="px-3 py-1 border rounded-full border-[#5C7C86] text-[#5C7C86]"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                  ))}
+
                   {/* Clear */}
                   <button
                     onClick={() => {
-                      setYellowPass(0);
-                      setRedGreenPass(0);
+                      setSelectedVariants({});
                       setPassOpen(null);
                     }}
                     className="mt-4 text-[#aa3030] font-semibold text-sm text-underline"
