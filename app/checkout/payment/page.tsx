@@ -7,6 +7,7 @@ import OrderSummary from "./component/OrderSummary";
 import CheckoutFooter from "../component/footer";
 import { getContentByType } from "../../../helper";
 import { OrderService, OrderData } from "../../../services/OrderService";
+import { useCart } from "../../../contexts/CartContext";
 
 interface PaymentPageData {
   email_address_heading: string;
@@ -61,6 +62,7 @@ interface PaymentPageData {
 function PaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { clearCart } = useCart();
   const [paymentData, setPaymentData] = useState<PaymentPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -232,9 +234,19 @@ function PaymentContent() {
       const orderResult = await OrderService.createOrder(orderData);
 
       if (orderResult.success) {
+        // Clear the cart after successful order creation
+        try {
+          await clearCart();
+          console.log('Cart cleared after successful order creation');
+        } catch (cartError) {
+          console.error('Error clearing cart:', cartError);
+          // Don't fail the order if cart clearing fails
+        }
+
         // Prepare success page URL with order data
         const successParams = new URLSearchParams({
           orderId: orderResult.orderId || `LPS-${Date.now()}`,
+          orderNumber: orderResult.orderNumber || '',
           date: selectedDate || '',
           tickets: totalTickets || '',
           yellowPass: yellowPass || '',

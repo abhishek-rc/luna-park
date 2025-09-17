@@ -23,69 +23,48 @@ export class OrderService {
    */
   static async createOrder(orderData: OrderData): Promise<{
     success: boolean;
-    checkoutUrl?: string;
     orderId?: string;
+    orderNumber?: string;
     error?: string;
   }> {
     try {
-      // Generate order ID first
-      const orderId = `LPS-${Date.now()}`;
+      console.log('Creating order via API route:', orderData);
       
-      // Prepare line items for Shopify
-      const lineItems = orderData.items.map(item => ({
-        variantId: item.variantId,
-        quantity: item.quantity
-      }));
-
-      // Try to create checkout in Shopify
-      const checkoutResult = await ShopifyProductService.createCheckout(lineItems);
+      // Call our server-side API route instead of Shopify API directly
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
       
-      if (checkoutResult.success && checkoutResult.checkoutUrl) {
-        // In a real implementation, you would:
-        // 1. Save order details to your database
-        // 2. Send confirmation email
-        // 3. Update inventory
-        // 4. Process payment
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('Order created successfully:', {
+          orderId: result.orderId,
+          orderNumber: result.orderNumber
+        });
 
         return {
           success: true,
-          checkoutUrl: checkoutResult.checkoutUrl,
-          orderId: orderId
+          orderId: result.orderId,
+          orderNumber: result.orderNumber
         };
       } else {
-        // Fallback: Create a mock successful order for testing
-        // In development, we'll create a mock successful order
-        if (process.env.NODE_ENV === 'development') {
-
-          return {
-            success: true,
-            checkoutUrl: `https://checkout.shopify.com/mock-checkout/${orderId}`,
-            orderId: orderId
-          };
-        }
-
+        console.error('Order creation failed:', result.error);
         return {
           success: false,
-          error: checkoutResult.error || 'Failed to create checkout'
+          error: result.error || 'Failed to create order'
         };
       }
     } catch (error) {
       console.error('Error creating order:', error);
       
-      // Fallback for development
-      if (process.env.NODE_ENV === 'development') {
-        const orderId = `LPS-${Date.now()}`;
-
-        return {
-          success: true,
-          checkoutUrl: `https://checkout.shopify.com/mock-checkout/${orderId}`,
-          orderId: orderId
-        };
-      }
-
       return {
         success: false,
-        error: 'Failed to create order'
+        error: error instanceof Error ? error.message : 'Failed to create order'
       };
     }
   }

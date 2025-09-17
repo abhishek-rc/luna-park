@@ -261,13 +261,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ paymentData, onSubmit, onBack
                 }`}
                 maxLength={19}
               />
-              {/* Card Icons */}
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-1">
-                <div className="w-8 h-5 bg-blue-600 rounded text-white text-xs flex items-center justify-center font-bold">VISA</div>
-                <div className="w-8 h-5 bg-red-600 rounded text-white text-xs flex items-center justify-center font-bold">MC</div>
-                <div className="w-8 h-5 bg-green-600 rounded text-white text-xs flex items-center justify-center font-bold">AE</div>
-                <div className="w-8 h-5 bg-orange-600 rounded text-white text-xs flex items-center justify-center font-bold">D</div>
-              </div>
             </div>
             {errors.cardNumber && (
               <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>
@@ -296,25 +289,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ paymentData, onSubmit, onBack
               )}
             </div>
             <div>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="securityCode"
-                  value={formData.securityCode}
-                  onChange={handleInputChange}
-                  placeholder={paymentData?.security_code_placeholder || "CVC"}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#aa3030] focus:border-transparent ${
-                    errors.securityCode ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  maxLength={4}
-                />
-                {/* CVC Icon */}
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-6 h-4 bg-gray-200 rounded text-xs flex items-center justify-center">
-                    <span className="text-gray-600">123</span>
-                  </div>
-                </div>
-              </div>
+              <input
+                type="password"
+                name="securityCode"
+                value={formData.securityCode}
+                onChange={handleInputChange}
+                placeholder={paymentData?.security_code_placeholder || "CVV"}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#aa3030] focus:border-transparent ${
+                  errors.securityCode ? 'border-red-500' : 'border-gray-300'
+                }`}
+                maxLength={4}
+                autoComplete="off"
+              />
               {errors.securityCode && (
                 <p className="text-red-500 text-sm mt-1">{errors.securityCode}</p>
               )}

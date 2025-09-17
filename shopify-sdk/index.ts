@@ -11,18 +11,25 @@ const envConfig = {
 
 // Validate Shopify configuration
 const validateShopifyConfig = () => {
-    const errors = [];
+    const errors: string[] = [];
+    const warnings: string[] = [];
 
     if (!envConfig.SHOPIFY_SHOP_DOMAIN) {
         errors.push("SHOPIFY_SHOP_DOMAIN is required");
+    } else if (envConfig.SHOPIFY_SHOP_DOMAIN.includes('your-') || envConfig.SHOPIFY_SHOP_DOMAIN.includes('your_')) {
+        errors.push("SHOPIFY_SHOP_DOMAIN contains placeholder value - please set your actual shop domain");
     }
 
     if (!envConfig.SHOPIFY_ACCESS_TOKEN) {
         errors.push("SHOPIFY_ACCESS_TOKEN is required");
+    } else if (envConfig.SHOPIFY_ACCESS_TOKEN.includes('your-') || envConfig.SHOPIFY_ACCESS_TOKEN.includes('your_')) {
+        errors.push("SHOPIFY_ACCESS_TOKEN contains placeholder value - please set your actual admin API token");
     }
 
     if (!envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
         errors.push("SHOPIFY_STOREFRONT_ACCESS_TOKEN is required");
+    } else if (envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN.includes('your-') || envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN.includes('your_')) {
+        errors.push("SHOPIFY_STOREFRONT_ACCESS_TOKEN contains placeholder value - please set your actual storefront token");
     }
 
     if (errors.length > 0) {
@@ -31,7 +38,15 @@ const validateShopifyConfig = () => {
         console.error(
             "Please set the required environment variables in your .env.local file"
         );
+        console.error(
+            "Run 'node scripts/check-shopify-config.js' to validate your configuration"
+        );
         return false;
+    }
+
+    if (warnings.length > 0) {
+        console.warn("⚠️ Shopify configuration warnings:");
+        warnings.forEach((warning) => console.warn(`  - ${warning}`));
     }
 
     console.log("✅ Shopify configuration is valid");
@@ -104,6 +119,64 @@ const shopifyGraphQLClient = {
             console.error("GraphQL Errors:", data.errors);
             throw new Error(
                 `GraphQL errors: ${data.errors.map((e: any) => e.message).join(", ")}`
+            );
+        }
+
+        return data.data;
+    },
+};
+
+// GraphQL client for Shopify Admin API
+const shopifyAdminGraphQLClient = {
+    // Execute GraphQL query using Admin API
+    query: async (query: string, variables: any = {}) => {
+        if (!isShopifyConfigured) {
+            throw new Error(
+                "Shopify is not properly configured. Please check your environment variables."
+            );
+        }
+
+        console.log("Admin GraphQL Query:", query);
+        console.log("Admin GraphQL Variables:", variables);
+        console.log("Shopify Domain:", envConfig.SHOPIFY_SHOP_DOMAIN);
+        console.log("API Version:", envConfig.SHOPIFY_API_VERSION);
+
+            const response = await fetch(
+                `https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/2025-07/graphql.json`,
+            {
+                method: "POST",
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                    "X-Shopify-Access-Token": envConfig.SHOPIFY_ACCESS_TOKEN ?? "",
+                }),
+                body: JSON.stringify({
+                    query,
+                    variables,
+                }),
+            }
+        );
+
+        console.log("Admin GraphQL Response Status:", response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Shopify Admin API Error:", {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText,
+            });
+            throw new Error(
+                `Failed to execute Admin GraphQL query: ${response.status} ${response.statusText}`
+            );
+        }
+
+        const data = await response.json();
+        console.log("Admin GraphQL Response Data:", JSON.stringify(data, null, 2));
+
+        if (data.errors) {
+            console.error("Admin GraphQL Errors:", data.errors);
+            throw new Error(
+                `Admin GraphQL errors: ${data.errors.map((e: any) => e.message).join(", ")}`
             );
         }
 
@@ -307,340 +380,132 @@ export class ShopifyProductService {
         }
     }
 
+
+
+
+
+
     /**
-     * Get product by ID
+     * Create a real order using Shopify Admin API
      */
-    static async getProductById(
-        productId: string
-    ): Promise<ShopifyProduct | null> {
+    static async createOrder(
+        orderData: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            lineItems: Array<{
+                variantId: string;
+                quantity: number;
+                price?: number;
+            }>;
+            totalPrice: number;
+            financialStatus?: 'pending' | 'paid' | 'partially_paid' | 'refunded' | 'voided' | 'partially_refunded';
+            fulfillmentStatus?: 'fulfilled' | 'null' | 'partial' | 'restocked';
+            note?: string;
+        }
+    ): Promise<{
+        success: boolean;
+        orderId?: string;
+        orderNumber?: string;
+        error?: string;
+    }> {
         if (!isShopifyConfigured) {
-            console.warn("Shopify is not configured, returning null");
-            return null;
+            return {
+                success: false,
+                error: "Shopify is not properly configured",
+            };
         }
 
         try {
-            const query = `
-                query getProduct($id: ID!) {
-                    product(id: $id) {
-                        id
-                        title
-                        handle
-                        description
-                        productType
-                        vendor
-                        tags
-                        createdAt
-                        updatedAt
-                        publishedAt
-                        availableForSale
-                        images(first: 10) {
-                            edges {
-                                node {
-                                    id
-                                    url
-                                    altText
-                                    width
-                                    height
-                                }
-                            }
-                        }
-                        variants(first: 100) {
-                            edges {
-                                node {
-                                    id
-                                    title
-                                    price {
-                                        amount
-                                        currencyCode
-                                    }
-                                    compareAtPrice {
-                                        amount
-                                        currencyCode
-                                    }
-                                    sku
-                                    availableForSale
-                                    quantityAvailable
-                                    selectedOptions {
-                                        name
-                                        value
-                                    }
-                                }
-                            }
-                        }
-                        options {
+            // Use Admin API to create a real order
+            const orderMutation = `
+                mutation orderCreate($order: OrderCreateOrderInput!, $options: OrderCreateOptionsInput) {
+                    orderCreate(order: $order, options: $options) {
+                        order {
                             id
                             name
-                            values
+                            email
+                            totalPriceSet {
+                                shopMoney {
+                                    amount
+                                    currencyCode
+                                }
+                            }
+                            lineItems(first: 10) {
+                                nodes {
+                                    id
+                                    title
+                                    quantity
+                                    variant {
+                                        id
+                                        title
+                                    }
+                                }
+                            }
+                            createdAt
+                            updatedAt
+                        }
+                        userErrors {
+                            field
+                            message
                         }
                     }
                 }
             `;
 
-            const data = await shopifyGraphQLClient.query(query, {
-                id: productId.startsWith("gid://")
-                    ? productId
-                    : `gid://shopify/Product/${productId}`,
-            });
-
-            if (!data?.product) {
-                return null;
-            }
-
-            const mappedProduct = this.mapShopifyProduct(data.product);
-
-            // Fetch metafields for this product
-            const metafields = await this.getProductMetafields(data.product.id);
-            mappedProduct.metafields = metafields.map((mf: any) => ({
-                id: mf.id,
-                namespace: mf.namespace,
-                key: mf.key,
-                value: mf.value,
-                type: mf.type,
+            // Prepare line items for the order
+            const orderLineItems = orderData.lineItems.map(item => ({
+                variantId: `gid://shopify/ProductVariant/${item.variantId}`,
+                quantity: item.quantity
             }));
 
-            return mappedProduct;
-        } catch (error) {
-            console.error("Error fetching product from Shopify:", error);
-            return null;
-        }
-    }
+            const orderInput = {
+                lineItems: orderLineItems,
+                email: orderData.email,
+                ...(orderData.note && { note: orderData.note })
+            };
 
-    /**
-     * Get product by handle
-     */
-    static async getProductByHandle(
-        handle: string
-    ): Promise<ShopifyProduct | null> {
-        if (!isShopifyConfigured) {
-            console.warn("Shopify is not configured, returning null");
-            return null;
-        }
+            const optionsInput = {
+                // Minimal options - only include valid fields
+            };
 
-        try {
-            const query = `
-                query searchProducts($query: String!, $first: Int!) {
-                    products(first: $first, query: $query) {
-                        edges {
-                            node {
-                                id
-                                title
-                                handle
-                                description
-                                productType
-                                vendor
-                                tags
-                                createdAt
-                                updatedAt
-                                publishedAt
-                                availableForSale
-                                images(first: 10) {
-                                    edges {
-                                        node {
-                                            id
-                                            url
-                                            altText
-                                            width
-                                            height
-                                        }
-                                    }
-                                }
-                                variants(first: 100) {
-                                    edges {
-                                        node {
-                                            id
-                                            title
-                                            price {
-                                                amount
-                                                currencyCode
-                                            }
-                                            compareAtPrice {
-                                                amount
-                                                currencyCode
-                                            }
-                                            sku
-                                            availableForSale
-                                            quantityAvailable
-                                            selectedOptions {
-                                                name
-                                                value
-                                            }
-                                        }
-                                    }
-                                }
-                                options {
-                                    id
-                                    name
-                                    values
-                                }
-                            }
-                        }
-                    }
-                }
-            `;
+            console.log('Creating order with input:', JSON.stringify(orderInput, null, 2));
 
-            const data = await shopifyGraphQLClient.query(query, {
-                query: `handle:${handle}`,
-                first: 1,
+            const orderData_result = await shopifyAdminGraphQLClient.query(orderMutation, {
+                order: orderInput,
+                options: optionsInput
             });
 
-            const products =
-                data?.products?.edges?.map((edge: any) => edge.node) || [];
-            if (products.length > 0) {
-                const product = products[0];
-                const mappedProduct = this.mapShopifyProduct(product);
-
-                // Fetch metafields for this product
-                const metafields = await this.getProductMetafields(product.id);
-                mappedProduct.metafields = metafields.map((mf: any) => ({
-                    id: mf.id,
-                    namespace: mf.namespace,
-                    key: mf.key,
-                    value: mf.value,
-                    type: mf.type,
-                }));
-
-                return mappedProduct;
+            if (orderData_result?.orderCreate?.userErrors?.length > 0) {
+                const errors = orderData_result.orderCreate.userErrors;
+                return {
+                    success: false,
+                    error: errors.map((e: any) => e.message).join(", "),
+                };
             }
-            return null;
+
+            const order = orderData_result?.orderCreate?.order;
+            if (order) {
+                console.log('Order created successfully:', order);
+                return {
+                    success: true,
+                    orderId: order.id,
+                    orderNumber: order.name // Shopify uses 'name' field for order number
+                };
+            }
+
+            return {
+                success: false,
+                error: "Failed to create order - no order returned",
+            };
         } catch (error) {
-            console.error("Error fetching product by handle from Shopify:", error);
-            return null;
+            console.error("Error creating order:", error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : "Failed to create order",
+            };
         }
     }
-
-    /**
-     * Get products by product_key metafield (matching card_key from Contentstack)
-     */
-    static async getProductsByProductKey(
-        productKey: string
-    ): Promise<ShopifyProduct[]> {
-        if (!isShopifyConfigured) {
-            console.warn("Shopify is not configured, returning empty products array");
-            return [];
-        }
-
-        try {
-            // Get all products and filter by metafield
-            const allProducts = await this.getAllProducts();
-            return allProducts.filter((product) =>
-                product.metafields.some(
-                    (mf: any) =>
-                        mf.namespace === "custom" &&
-                        mf.key === "product_key" &&
-                        mf.value === productKey
-                )
-            );
-        } catch (error) {
-            console.error(
-                "Error fetching products by product key from Shopify:",
-                error
-            );
-            return [];
-        }
-    }
-
-    /**
-     * Search products by title or tags
-     */
-    static async searchProducts(query: string): Promise<ShopifyProduct[]> {
-        if (!isShopifyConfigured) {
-            console.warn("Shopify is not configured, returning empty products array");
-            return [];
-        }
-
-        try {
-            const searchQuery = `
-                query searchProducts($query: String!, $first: Int!) {
-                    products(first: $first, query: $query) {
-                        edges {
-                            node {
-                                id
-                                title
-                                handle
-                                description
-                                productType
-                                vendor
-                                tags
-                                createdAt
-                                updatedAt
-                                publishedAt
-                                availableForSale
-                                images(first: 10) {
-                                    edges {
-                                        node {
-                                            id
-                                            url
-                                            altText
-                                            width
-                                            height
-                                        }
-                                    }
-                                }
-                                variants(first: 100) {
-                                    edges {
-                                        node {
-                                            id
-                                            title
-                                            price {
-                                                amount
-                                                currencyCode
-                                            }
-                                            compareAtPrice {
-                                                amount
-                                                currencyCode
-                                            }
-                                            sku
-                                            availableForSale
-                                            quantityAvailable
-                                            selectedOptions {
-                                                name
-                                                value
-                                            }
-                                        }
-                                    }
-                                }
-                                options {
-                                    id
-                                    name
-                                    values
-                                }
-                            }
-                        }
-                    }
-                }
-            `;
-
-            const data = await shopifyGraphQLClient.query(searchQuery, {
-                query: `title:${query}`,
-                first: 50,
-            });
-
-            const products =
-                data?.products?.edges?.map((edge: any) => edge.node) || [];
-
-            return await Promise.all(
-                products.map(async (product: any) => {
-                    const mappedProduct = this.mapShopifyProduct(product);
-
-                    // Fetch metafields for this product
-                    const metafields = await this.getProductMetafields(product.id);
-                    mappedProduct.metafields = metafields.map((mf: any) => ({
-                        id: mf.id,
-                        namespace: mf.namespace,
-                        key: mf.key,
-                        value: mf.value,
-                        type: mf.type,
-                    }));
-
-                    return mappedProduct;
-                })
-            );
-        } catch (error) {
-            console.error("Error searching products in Shopify:", error);
-            return [];
-        }
-    }
-
 
     /**
      * Create checkout using Storefront API (using cartCreate as fallback)

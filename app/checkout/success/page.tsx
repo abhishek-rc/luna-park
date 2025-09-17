@@ -44,6 +44,7 @@ function SuccessContent() {
   const redGreenPass = searchParams.get('redGreenPass');
   const totalPrice = searchParams.get('totalPrice');
   const orderId = searchParams.get('orderId') || `LPS-${Date.now()}`;
+  const orderNumber = searchParams.get('orderNumber');
   const selectedVariantsParam = searchParams.get('selectedVariants');
 
   // Parse selected variants with error handling
@@ -186,8 +187,13 @@ function SuccessContent() {
             </p>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
               <p className="text-green-800 font-semibold">
-                Order ID: {orderId}
+                {orderNumber ? `Order #${orderNumber}` : `Order ID: ${orderId}`}
               </p>
+              {orderNumber && (
+                <p className="text-green-700 text-sm mt-1">
+                  This order has been created in Shopify and will appear in your admin dashboard.
+                </p>
+              )}
             </div>
           </div>
 
