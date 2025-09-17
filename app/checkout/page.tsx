@@ -24,6 +24,9 @@ export default function TicketBooking() {
   const [passOpen, setPassOpen] = useState<number | null>(null);
   const [ticketInfo, setTicektInfo] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [selectedVariants, setSelectedVariants] = useState<{ [key: string]: { variant: any; quantity: number } }>({});
+  const [contentData, setContentData] = useState<any[]>([]);
+
   const ticketQuantities = {
     yellow: yellowPass,
     redGreen: redGreenPass,
@@ -71,15 +74,14 @@ export default function TicketBooking() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 px-10">
-    
+
       <div className="flex justify-center space-x-8 text-sm font-semibold text-gray-600 mb-8">
         <span className="text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6">
           01. SELECT TICKETS
         </span>
         <span
-          className={`${
-            ticketInfo ? "text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6" : "tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6"
-          }`}
+          className={`${ticketInfo ? "text-[#105974] border-b-[4px] border-[#aa3030] pb-1 tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6" : "tracking-[0.75px] text-[1.3rem] leading-[1.5rem] py-6"
+            }`}
         >
           02. TICKETS INFO
         </span>
@@ -96,6 +98,9 @@ export default function TicketBooking() {
             yellowPass={yellowPass}
             setRedGreenPass={setRedGreenPass}
             redGreenPass={redGreenPass}
+            selectedVariants={selectedVariants}
+            setSelectedVariants={setSelectedVariants}
+            setContentData={setContentData}
           />
         )}
         {ticketInfo && (
@@ -109,6 +114,7 @@ export default function TicketBooking() {
             setCurrentStep={setCurrentStep}
             onDateChange={onDateChange}
             ticketPrices={ticketPrices}
+            selectedVariants={selectedVariants}
           />
         )}
         <Summary
@@ -118,6 +124,8 @@ export default function TicketBooking() {
           totalPrice={totalPrice}
           setTicektInfo={setTicektInfo}
           selectedDate={selectedDate}
+          selectedVariants={selectedVariants}
+          contentData={contentData}
         />
       </div>
       <CheckoutFooter />

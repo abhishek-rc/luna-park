@@ -6,19 +6,18 @@ import { ProductMappingService } from '../services/ProductMappingService';
 import { EnhancedHomepageTicketCard } from '../typescript/layout';
 import { formatPrice, getProductImageUrl } from '../shopify-sdk/utils';
 import { useShopifyProducts } from '../hooks/useShopifyProducts';
-import { useCart } from '../contexts/CartContext';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function TicketBookingSection() {
     const { homepageData, loading, error } = useHomePageData();
     const [activeTab, setActiveTab] = useState(1);
     const [enhancedCards, setEnhancedCards] = useState<EnhancedHomepageTicketCard[]>([]);
     const [enhancementLoading, setEnhancementLoading] = useState(false);
+    const router = useRouter();
 
     const { products, loading: productsLoading, error: productsError } = useShopifyProducts();
-    const { addToCart } = useCart();
-
-    console.log('products>>>>>>>>>>>>', products);
 
     // Enhance cards with Shopify data when products are loaded
     useEffect(() => {
@@ -40,33 +39,9 @@ export default function TicketBookingSection() {
         enhanceCards();
     }, [homepageData, products]);
 
-    const handleBuyNow = async (card: any, enhancedCard: EnhancedHomepageTicketCard) => {
-        if (!enhancedCard.shopifyProduct || !enhancedCard.isAvailable) {
-            alert('This product is not available for purchase');
-            return;
-        }
-
-        const defaultVariant = enhancedCard.shopifyProduct.variants[0];
-        if (!defaultVariant) {
-            alert('No variants available for this product');
-            return;
-        }
-
-        try {
-            await addToCart({
-                product: enhancedCard.shopifyProduct,
-                variantId: defaultVariant.id,
-                quantity: 1,
-                price: defaultVariant.price,
-                title: enhancedCard.shopifyProduct.title,
-                image: enhancedCard.shopifyProduct.images[0]?.url,
-            });
-
-            alert('Item added to cart successfully!');
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            alert('Failed to add item to cart. Please try again.');
-        }
+    const handleBuyNow = () => {
+        // Redirect to checkout page
+        router.push('/checkout');
     };
 
     if (loading || enhancementLoading) {
@@ -181,48 +156,13 @@ export default function TicketBookingSection() {
                                             {card?.card_title || 'Ticket'}
                                         </h3>
 
-                                        {/* Price Display */}
-                                        {enhancedCard?.price && (
-                                            <div className="mb-4">
-                                                <span className="text-2xl font-bold text-[#aa3030]">
-                                                    {formatPrice(enhancedCard.price)}
-                                                </span>
-                                                {enhancedCard.compareAtPrice && enhancedCard.compareAtPrice !== enhancedCard.price && (
-                                                    <span className="text-lg text-gray-500 line-through ml-2">
-                                                        {formatPrice(enhancedCard.compareAtPrice)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* Inventory Status */}
-                                        {enhancedCard?.inventoryQuantity !== undefined && (
-                                            <div className="mb-4 text-sm text-gray-600">
-                                                {enhancedCard.inventoryQuantity > 0
-                                                    ? `${enhancedCard.inventoryQuantity} in stock`
-                                                    : 'Out of stock'
-                                                }
-                                            </div>
-                                        )}
-
-                                        {/* Buy Now Button */}
-                                        {enhancedCard && (
-                                            <div className="mt-4">
-                                                <button
-                                                    onClick={() => handleBuyNow(card, enhancedCard)}
-                                                    disabled={!enhancedCard.isAvailable || !enhancedCard.shopifyProduct}
-                                                    className={`w-full py-2 px-4 rounded-md font-semibold text-sm uppercase transition-all duration-200 ${enhancedCard.isAvailable && enhancedCard.shopifyProduct
-                                                        ? 'bg-[#aa3030] text-white hover:bg-[#8a2525] hover:shadow-lg'
-                                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                        }`}
-                                                >
-                                                    {enhancedCard.isAvailable && enhancedCard.shopifyProduct
-                                                        ? 'Buy Now'
-                                                        : 'Not Available'
-                                                    }
-                                                </button>
-                                            </div>
-                                        )}
+                                        {/* CTA Button */}
+                                        <Link
+                                            href={card?.card_cta?.href || '#'}
+                                            className="block w-full text-center bg-[#e1e8ec] border-1 border-[#aa3030] hover:border-[#305871] text-[#aa3030] font-black py-3 px-4 rounded-full hover:text-[#305871] transition-all duration-200 text-xs"
+                                        >
+                                            {card?.card_cta?.title || 'Book Now'}
+                                        </Link>
                                     </div>
                                 </div>
                             );

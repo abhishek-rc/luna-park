@@ -20,6 +20,7 @@ interface DateSelectionProps {
   setCurrentStep: (step: number) => void;
   onDateChange: (dateStr: string, day?: Day) => void;
   ticketPrices: { [key: string]: number };
+  selectedVariants: { [key: string]: { variant: any; quantity: number } };
 }
 
 const DateSelection: React.FC<DateSelectionProps> = ({
@@ -32,6 +33,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
   setCurrentStep,
   onDateChange,
   ticketPrices,
+  selectedVariants,
 }) => {
   if (currentStep === 1) {
     return (
@@ -67,11 +69,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
             {calendarData.map((day) => (
               <div
                 key={`cal-${String(day.date)}`}
-                className={`aspect-square rounded-lg border-2 p-2 text-center ${
-                  day.available
-                    ? 'border-green-200 bg-green-50 hover:border-green-400 cursor-pointer'
-                    : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                }`}
+                className={`aspect-square rounded-lg border-2 p-2 text-center ${day.available
+                  ? 'border-green-200 bg-green-50 hover:border-green-400 cursor-pointer'
+                  : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                  }`}
                 onClick={() => {
                   if (day.available) {
                     const iso = `2025-09-${String(day.date).padStart(2, '0')}`;
@@ -98,39 +99,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
   }
 
   if (currentStep === 2) {
+
     return (
       <div className="space-y-6 lg:col-span-2">
-        <Extras/>
-        {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Visit Details</h3>
-          <p className="text-blue-800">
-            <strong>Date:</strong> {selectedDate || 'Please select a date'}
-          </p>
-          <p className="text-blue-800">
-            <strong>Total Tickets:</strong> {totalTickets}
-          </p>
-        </div> */}
-
-        {/* <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">Selected Tickets</h3>
-          {Object.entries(ticketQuantities).map(([type, quantity]) => {
-            if (!quantity) return null;
-            return (
-              <div key={type} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="capitalize font-medium">{quantity}x {type} Ticket</span>
-                <span className="font-semibold text-blue-600">
-                  ${Number(quantity * (ticketPrices as any)[type]).toFixed(2)}
-                </span>
-              </div>
-            );
-          })}
-
-          {totalTickets === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No tickets selected. Please go back to select your tickets.</p>
-            </div>
-          )}
-        </div> */}
+        <Extras />
       </div>
     );
   }
