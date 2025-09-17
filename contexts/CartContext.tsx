@@ -61,6 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     quantity: edge.node.quantity,
                     price: edge.node.merchandise.price.amount,
                     title: edge.node.merchandise.title,
+                    image: edge.node.merchandise.image?.url || edge.node.merchandise.product.images?.edges?.[0]?.node?.url || '',
                     lineItemId: edge.node.id.replace('gid://shopify/CartLine/', ''),
                 }));
 

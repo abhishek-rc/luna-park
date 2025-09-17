@@ -52,14 +52,16 @@ export default function LunaParkHeader() {
             <div className="container mx-auto px-20">
                 <div className="flex items-center justify-between py-3">
                     {/* Primary Navigation */}
-                    <nav className="hidden md:flex items-center space-x-6">
-                        <Image
-                            src={headerData?.site_logo?.url || '/'}
-                            alt={headerData?.site_logo?.title || 'Logo'}
-                            width={120}
-                            height={40}
-                            className="h-8 w-auto cursor-pointer"
-                        />
+                    <nav className="hidden md:flex items-center space-x-6 cursor-pointer">
+                        <Link href="/">
+                            <Image
+                                src={headerData?.site_logo?.url || '/'}
+                                alt={headerData?.site_logo?.title || 'Logo'}
+                                width={120}
+                                height={40}
+                                className="h-8 w-auto cursor-pointer"
+                            />
+                        </Link>
                         {headerData?.primary_navigation?.map((navItem) => (
                             <div
                                 key={navItem?._metadata?.uid}

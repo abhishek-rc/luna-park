@@ -1342,9 +1342,19 @@ export class ShopifyProductService {
                                             amount
                                             currencyCode
                                         }
+                                        image {
+                                            url
+                                        }
                                         product {
                                             id
                                             title
+                                            images(first: 1) {
+                                                edges {
+                                                    node {
+                                                        url
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }

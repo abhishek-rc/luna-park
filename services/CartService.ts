@@ -22,9 +22,19 @@ export interface ShopifyCart {
                         amount: string;
                         currencyCode: string;
                     };
+                    image?: {
+                        url: string;
+                    };
                     product: {
                         id: string;
                         title: string;
+                        images?: {
+                            edges: Array<{
+                                node: {
+                                    url: string;
+                                };
+                            }>;
+                        };
                     };
                 };
             };

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getContentByType } from "../../../helper";
@@ -30,7 +30,7 @@ interface SuccessPageData {
   };
 }
 
-export default function SuccessPage() {
+function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [successData, setSuccessData] = useState<SuccessPageData | null>(null);
@@ -45,7 +45,7 @@ export default function SuccessPage() {
   const totalPrice = searchParams.get('totalPrice');
   const orderId = searchParams.get('orderId') || `LPS-${Date.now()}`;
   const selectedVariantsParam = searchParams.get('selectedVariants');
-  
+
   // Parse selected variants with error handling
   let selectedVariants = {};
   try {
@@ -69,8 +69,8 @@ export default function SuccessPage() {
           if (contentstackData.success_content) {
             // If data is in JSON field, parse it
             try {
-              const parsedData = typeof contentstackData.success_content === 'string' 
-                ? JSON.parse(contentstackData.success_content) 
+              const parsedData = typeof contentstackData.success_content === 'string'
+                ? JSON.parse(contentstackData.success_content)
                 : contentstackData.success_content;
               setSuccessData(parsedData);
             } catch (e) {
@@ -261,7 +261,7 @@ export default function SuccessPage() {
                   </div>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Visit Date</p>
@@ -373,5 +373,17 @@ export default function SuccessPage() {
       {/* Footer */}
       <CheckoutFooter />
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#aa3030]"></div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

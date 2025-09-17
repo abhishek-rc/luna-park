@@ -39,11 +39,6 @@ export default function TicketBookingSection() {
         enhanceCards();
     }, [homepageData, products]);
 
-    const handleBuyNow = () => {
-        // Redirect to checkout page
-        router.push('/checkout');
-    };
-
     if (loading || enhancementLoading) {
         return (
             <section className="bg-[#2a324a] py-16">
@@ -137,17 +132,6 @@ export default function TicketBookingSection() {
                                             fill
                                             className="object-cover"
                                         />
-                                        {/* Availability Badge */}
-                                        {enhancedCard && (
-                                            <div className="absolute top-2 right-2">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${enhancedCard.isAvailable
-                                                    ? 'bg-green-500 text-white'
-                                                    : 'bg-red-500 text-white'
-                                                    }`}>
-                                                    {enhancedCard.isAvailable ? 'Available' : 'Unavailable'}
-                                                </span>
-                                            </div>
-                                        )}
                                     </div>
 
                                     {/* Card Content */}

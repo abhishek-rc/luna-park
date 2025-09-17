@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentForm from "./component/PaymentForm";
@@ -58,7 +58,7 @@ interface PaymentPageData {
   };
 }
 
-export default function PaymentPage() {
+function PaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [paymentData, setPaymentData] = useState<PaymentPageData | null>(null);
@@ -72,7 +72,7 @@ export default function PaymentPage() {
   const redGreenPass = searchParams.get('redGreenPass');
   const totalPrice = searchParams.get('totalPrice');
   const selectedVariantsParam = searchParams.get('selectedVariants');
-  
+
   // Parse selected variants with error handling
   let selectedVariants = {};
   try {
@@ -188,9 +188,14 @@ export default function PaymentPage() {
 
   const handlePaymentSubmit = async (formData: any) => {
     try {
-      
+
       // Prepare order items from selectedVariants
-      const orderItems = [];
+      const orderItems: Array<{
+        variantId: string;
+        quantity: number;
+        price: number;
+        title: string;
+      }> = [];
       if (selectedVariants && typeof selectedVariants === 'object') {
         Object.values(selectedVariants).forEach((item: any) => {
           if (item && item.variant && item.quantity > 0) {
@@ -225,7 +230,7 @@ export default function PaymentPage() {
 
       // Create order in Shopify
       const orderResult = await OrderService.createOrder(orderData);
-      
+
       if (orderResult.success) {
         // Prepare success page URL with order data
         const successParams = new URLSearchParams({
@@ -237,7 +242,7 @@ export default function PaymentPage() {
           totalPrice: totalPrice || '',
           selectedVariants: JSON.stringify(selectedVariants)
         });
-        
+
         // Redirect to success page with order data
         router.push(`/checkout/success?${successParams.toString()}`);
       } else {
@@ -322,5 +327,17 @@ export default function PaymentPage() {
       {/* Footer */}
       <CheckoutFooter />
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#aa3030]"></div>
+      </div>
+    }>
+      <PaymentContent />
+    </Suspense>
   );
 }
