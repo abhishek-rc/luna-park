@@ -396,6 +396,7 @@ export type ShopifyProduct = {
     vendor: string;
     tags: string[];
     status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
+    availableForSale: boolean;
     createdAt: string;
     updatedAt: string;
     publishedAt: string;

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHomePageData } from '../hooks/useHomePageData';
 import { ProductMappingService } from '../services/ProductMappingService';
 import { EnhancedHomepageTicketCard } from '../typescript/layout';
 import { formatPrice, getProductImageUrl } from '../shopify-sdk/utils';
 import { useShopifyProducts } from '../hooks/useShopifyProducts';
+import { useCart } from '../contexts/CartContext';
 import Image from 'next/image';
 
 export default function TicketBookingSection() {
@@ -15,8 +16,58 @@ export default function TicketBookingSection() {
     const [enhancementLoading, setEnhancementLoading] = useState(false);
 
     const { products, loading: productsLoading, error: productsError } = useShopifyProducts();
+    const { addToCart } = useCart();
 
     console.log('products>>>>>>>>>>>>', products);
+
+    // Enhance cards with Shopify data when products are loaded
+    useEffect(() => {
+        const enhanceCards = async () => {
+            if (homepageData?.ticketbooking_group && products.length > 0) {
+                setEnhancementLoading(true);
+                try {
+                    const allCards = homepageData.ticketbooking_group.flatMap(group => group.ticketbooking_cards || []);
+                    const enhanced = await ProductMappingService.enhanceTicketCardsWithShopifyData(allCards);
+                    setEnhancedCards(enhanced);
+                } catch (error) {
+                    console.error('Error enhancing cards:', error);
+                } finally {
+                    setEnhancementLoading(false);
+                }
+            }
+        };
+
+        enhanceCards();
+    }, [homepageData, products]);
+
+    const handleBuyNow = async (card: any, enhancedCard: EnhancedHomepageTicketCard) => {
+        if (!enhancedCard.shopifyProduct || !enhancedCard.isAvailable) {
+            alert('This product is not available for purchase');
+            return;
+        }
+
+        const defaultVariant = enhancedCard.shopifyProduct.variants[0];
+        if (!defaultVariant) {
+            alert('No variants available for this product');
+            return;
+        }
+
+        try {
+            await addToCart({
+                product: enhancedCard.shopifyProduct,
+                variantId: defaultVariant.id,
+                quantity: 1,
+                price: defaultVariant.price,
+                title: enhancedCard.shopifyProduct.title,
+                image: enhancedCard.shopifyProduct.images[0]?.url,
+            });
+
+            alert('Item added to cart successfully!');
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            alert('Failed to add item to cart. Please try again.');
+        }
+    };
 
     if (loading || enhancementLoading) {
         return (
@@ -60,10 +111,11 @@ export default function TicketBookingSection() {
         <section className="bg-[#305871] py-24">
             <div className="container mx-auto px-4 max-w-7xl">
                 {/* Section Title */}
-                <div className="text-center mb-20">
+                <div className="text-center mb-20 relative">
                     <h2 className="text-2xl md:text-4xl font-black text-[#f9ebd1] uppercase">
                         BOOK YOUR TICKETS ONLINE
                     </h2>
+
                 </div>
 
                 {/* Tab Navigation */}
@@ -150,6 +202,25 @@ export default function TicketBookingSection() {
                                                     ? `${enhancedCard.inventoryQuantity} in stock`
                                                     : 'Out of stock'
                                                 }
+                                            </div>
+                                        )}
+
+                                        {/* Buy Now Button */}
+                                        {enhancedCard && (
+                                            <div className="mt-4">
+                                                <button
+                                                    onClick={() => handleBuyNow(card, enhancedCard)}
+                                                    disabled={!enhancedCard.isAvailable || !enhancedCard.shopifyProduct}
+                                                    className={`w-full py-2 px-4 rounded-md font-semibold text-sm uppercase transition-all duration-200 ${enhancedCard.isAvailable && enhancedCard.shopifyProduct
+                                                        ? 'bg-[#aa3030] text-white hover:bg-[#8a2525] hover:shadow-lg'
+                                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    {enhancedCard.isAvailable && enhancedCard.shopifyProduct
+                                                        ? 'Buy Now'
+                                                        : 'Not Available'
+                                                    }
+                                                </button>
                                             </div>
                                         )}
                                     </div>

@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useHeaderData } from '../hooks/useHeaderData';
+import { useCart } from '../contexts/CartContext';
 
 export default function LunaParkHeader() {
     const router = useRouter();
+    const { openCart, state } = useCart();
     const {
         headerData,
         loading,
@@ -163,9 +165,9 @@ export default function LunaParkHeader() {
                             )}
 
                             {headerData?.user_actions?.show_cart && (
-                                <a
-                                    href="#"
-                                    className="flex items-center space-x-1 text-white hover:text-orange-400 transition-colors duration-200"
+                                <button
+                                    onClick={openCart}
+                                    className="relative flex items-center space-x-1 text-white hover:text-orange-400 transition-colors duration-200"
                                 >
                                     <Image
                                         src={headerData?.user_actions?.cart_icon?.url || '/'}
@@ -174,7 +176,12 @@ export default function LunaParkHeader() {
                                         height={20}
                                         className="w-6 h-6"
                                     />
-                                </a>
+                                    {state.totalItems > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-[#aa3030] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {state.totalItems}
+                                        </span>
+                                    )}
+                                </button>
                             )}
                         </div>
 

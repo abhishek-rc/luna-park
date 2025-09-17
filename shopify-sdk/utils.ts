@@ -40,14 +40,14 @@ export function getDefaultVariant(product: ShopifyProduct): ShopifyProduct['vari
  * Check if product is available for purchase
  */
 export function isProductAvailable(product: ShopifyProduct): boolean {
-    return product.status === 'ACTIVE' && product.variants.some(variant => variant.availableForSale);
+    return product.availableForSale && product.variants.some(variant => variant.availableForSale);
 }
 
 /**
  * Get product availability status
  */
 export function getProductAvailabilityStatus(product: ShopifyProduct): 'in_stock' | 'low_stock' | 'out_of_stock' | 'unavailable' {
-    if (product.status !== 'ACTIVE') {
+    if (!product.availableForSale) {
         return 'unavailable';
     }
 
@@ -103,7 +103,8 @@ export function getProductKey(product: ShopifyProduct): string | null {
  */
 export function productMatchesCardKey(product: ShopifyProduct, cardKey: string): boolean {
     const productKey = getProductKey(product);
-    return productKey === cardKey;
+    console.log('Product key:', productKey, 'Card key:', cardKey);
+    return productKey == cardKey;
 }
 
 /**

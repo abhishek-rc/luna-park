@@ -6,35 +6,35 @@ const envConfig = {
     SHOPIFY_SHOP_DOMAIN: process.env.SHOPIFY_SHOP_DOMAIN,
     SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
     SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || '2024-10',
+    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2024-10",
 };
-
-
 
 // Validate Shopify configuration
 const validateShopifyConfig = () => {
     const errors = [];
 
     if (!envConfig.SHOPIFY_SHOP_DOMAIN) {
-        errors.push('SHOPIFY_SHOP_DOMAIN is required');
+        errors.push("SHOPIFY_SHOP_DOMAIN is required");
     }
 
     if (!envConfig.SHOPIFY_ACCESS_TOKEN) {
-        errors.push('SHOPIFY_ACCESS_TOKEN is required');
+        errors.push("SHOPIFY_ACCESS_TOKEN is required");
     }
 
     if (!envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
-        errors.push('SHOPIFY_STOREFRONT_ACCESS_TOKEN is required');
+        errors.push("SHOPIFY_STOREFRONT_ACCESS_TOKEN is required");
     }
 
     if (errors.length > 0) {
-        console.error('❌ Shopify configuration errors:');
-        errors.forEach(error => console.error(`  - ${error}`));
-        console.error('Please set the required environment variables in your .env.local file');
+        console.error("❌ Shopify configuration errors:");
+        errors.forEach((error) => console.error(`  - ${error}`));
+        console.error(
+            "Please set the required environment variables in your .env.local file"
+        );
         return false;
     }
 
-    console.log('✅ Shopify configuration is valid');
+    console.log("✅ Shopify configuration is valid");
     return true;
 };
 
@@ -53,200 +53,62 @@ export const getShopifyConfigStatus = () => {
     };
 };
 
-// REST API client for Shopify Admin API
-const shopifyClient = {
-    // Get all products
-    getProducts: async () => {
+// GraphQL client for Shopify Storefront API
+const shopifyGraphQLClient = {
+    // Execute GraphQL query
+    query: async (query: string, variables: any = {}) => {
         if (!isShopifyConfigured) {
-            throw new Error('Shopify is not properly configured. Please check your environment variables.');
+            throw new Error(
+                "Shopify is not properly configured. Please check your environment variables."
+            );
         }
 
-        const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products.json`, {
-            headers: {
-                'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
-                'Content-Type': 'application/json',
-            },
-        });
+        console.log("GraphQL Query:", query);
+        console.log("GraphQL Variables:", variables);
+        console.log("Shopify Domain:", envConfig.SHOPIFY_SHOP_DOMAIN);
+        console.log("API Version:", envConfig.SHOPIFY_API_VERSION);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Shopify API Error:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
-            throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
-        }
-
-        return response.json();
-    },
-
-    // Get product by ID
-    getProduct: async (productId: string) => {
-        if (!isShopifyConfigured) {
-            throw new Error('Shopify is not properly configured. Please check your environment variables.');
-        }
-
-        const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products/${productId}.json`, {
-            headers: {
-                'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Shopify API Error:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
-            throw new Error(`Failed to fetch product: ${response.status} ${response.statusText}`);
-        }
-
-        return response.json();
-    },
-
-    // Search products
-    searchProducts: async (query: string) => {
-        if (!isShopifyConfigured) {
-            throw new Error('Shopify is not properly configured. Please check your environment variables.');
-        }
-
-        const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products.json?title=${encodeURIComponent(query)}`, {
-            headers: {
-                'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Shopify API Error:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
-            throw new Error(`Failed to search products: ${response.status} ${response.statusText}`);
-        }
-
-        return response.json();
-    },
-
-    // Create checkout (using Storefront API)
-    createCheckout: async (lineItems: Array<{ variantId: string; quantity: number }>) => {
-        if (!isShopifyConfigured) {
-            throw new Error('Shopify is not properly configured. Please check your environment variables.');
-        }
-
-        const mutation = `
-            mutation checkoutCreate($input: CheckoutCreateInput!) {
-                checkoutCreate(input: $input) {
-                    checkout {
-                        id
-                        webUrl
-                        lineItems(first: 10) {
-                            edges {
-                                node {
-                                    id
-                                    title
-                                    quantity
-                                    variant {
-                                        id
-                                        title
-                                        price {
-                                            amount
-                                            currencyCode
-                                        }
-                                        product {
-                                            id
-                                            title
-                                            handle
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        totalPrice {
-                            amount
-                            currencyCode
-                        }
-                        subtotalPrice {
-                            amount
-                            currencyCode
-                        }
-                        totalTax {
-                            amount
-                            currencyCode
-                        }
-                    }
-                    checkoutUserErrors {
-                        field
-                        message
-                    }
-                }
+        const response = await fetch(
+            `https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`,
+            {
+                method: "POST",
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                    "X-Shopify-Storefront-Access-Token": envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "",
+                }),
+                body: JSON.stringify({
+                    query,
+                    variables,
+                }),
             }
-        `;
+        );
 
-        const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/api/${envConfig.SHOPIFY_API_VERSION}/graphql.json`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Shopify-Storefront-Access-Token': envConfig.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-            },
-            body: JSON.stringify({
-                query: mutation,
-                variables: {
-                    input: {
-                        lineItems: lineItems.map(item => ({
-                            variantId: `gid://shopify/ProductVariant/${item.variantId}`,
-                            quantity: item.quantity,
-                        })),
-                    },
-                },
-            }),
-        });
+        console.log("GraphQL Response Status:", response.status);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Shopify Storefront API Error:', {
+            console.error("Shopify Storefront API Error:", {
                 status: response.status,
                 statusText: response.statusText,
-                body: errorText
+                body: errorText,
             });
-            throw new Error(`Failed to create checkout: ${response.status} ${response.statusText}`);
-        }
-
-        return response.json();
-    },
-};
-
-// Helper function to get product metafields
-const getProductMetafields = async (productId: string) => {
-    if (!isShopifyConfigured) {
-        console.warn('Shopify is not configured, returning empty metafields');
-        return [];
-    }
-
-    try {
-        const response = await fetch(`https://${envConfig.SHOPIFY_SHOP_DOMAIN}/admin/api/${envConfig.SHOPIFY_API_VERSION}/products/${productId}/metafields.json`, {
-            headers: {
-                'X-Shopify-Access-Token': envConfig.SHOPIFY_ACCESS_TOKEN,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            console.warn(`Failed to fetch metafields for product ${productId}: ${response.status} ${response.statusText}`);
-            return [];
+            throw new Error(
+                `Failed to execute GraphQL query: ${response.status} ${response.statusText}`
+            );
         }
 
         const data = await response.json();
-        return data.metafields || [];
-    } catch (error) {
-        console.error('Error fetching metafields:', error);
-        return [];
-    }
+        console.log("GraphQL Response Data:", JSON.stringify(data, null, 2));
+
+        if (data.errors) {
+            console.error("GraphQL Errors:", data.errors);
+            throw new Error(
+                `GraphQL errors: ${data.errors.map((e: any) => e.message).join(", ")}`
+            );
+        }
+
+        return data.data;
+    },
 };
 
 // Types for Shopify products
@@ -258,7 +120,8 @@ export interface ShopifyProduct {
     productType: string;
     vendor: string;
     tags: string[];
-    status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
+    status: "ACTIVE" | "ARCHIVED" | "DRAFT";
+    availableForSale: boolean;
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
@@ -296,51 +159,248 @@ export interface ShopifyProduct {
     }[];
 }
 
-
 // Product management functions
 export class ShopifyProductService {
+    /**
+     * Get metafields for a specific product using Storefront API
+     */
+    private static async getProductMetafields(productId: string): Promise<any[]> {
+        if (!isShopifyConfigured) {
+            return [];
+        }
+
+        try {
+            const query = `
+                query getProductMetafields($id: ID!) {
+                    product(id: $id) {
+                        metafields(identifiers: [
+                            {namespace: "custom", key: "product_key"}
+                        ]) {
+                            id
+                            namespace
+                            key
+                            value
+                            type
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(query, {
+                id: productId.startsWith("gid://")
+                    ? productId
+                    : `gid://shopify/Product/${productId}`,
+            });
+
+            return data?.product?.metafields || [];
+        } catch (error) {
+            console.error("Error fetching metafields:", error);
+            return [];
+        }
+    }
+
     /**
      * Get all products from Shopify
      */
     static async getAllProducts(): Promise<ShopifyProduct[]> {
         if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, returning empty products array');
+            console.warn("Shopify is not configured, returning empty products array");
             return [];
         }
 
         try {
-            console.log('Fetching products from Shopify...');
-            const response = await shopifyClient.getProducts();
-            console.log(`Found ${response.products?.length || 0} products`);
+            console.log("Fetching products from Shopify Storefront API...");
 
-            const products = await Promise.all(
-                response.products.map(async (product: any) => {
-                    const metafields = await getProductMetafields(product.id);
-                    return this.mapShopifyProduct(product, metafields);
+            const query = `
+                query getProducts($first: Int!) {
+                    products(first: $first) {
+                        edges {
+                            node {
+                                id
+                                title
+                                handle
+                                description
+                                productType
+                                vendor
+                                tags
+                                createdAt
+                                updatedAt
+                                publishedAt
+                                availableForSale
+                                images(first: 10) {
+                                    edges {
+                                        node {
+                                            id
+                                            url
+                                            altText
+                                            width
+                                            height
+                                        }
+                                    }
+                                }
+                                variants(first: 100) {
+                                    edges {
+                                        node {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            compareAtPrice {
+                                                amount
+                                                currencyCode
+                                            }
+                                            sku
+                                            availableForSale
+                                            quantityAvailable
+                                            selectedOptions {
+                                                name
+                                                value
+                                            }
+                                        }
+                                    }
+                                }
+                                options {
+                                    id
+                                    name
+                                    values
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(query, { first: 50 });
+            const products =
+                data?.products?.edges?.map((edge: any) => edge.node) || [];
+            console.log(`Found ${products.length} products from Storefront API`);
+
+            const mappedProducts = await Promise.all(
+                products.map(async (product: any) => {
+                    console.log("Mapping product:", product.id, product.title);
+                    const mappedProduct = this.mapShopifyProduct(product);
+
+                    // Fetch metafields for this product
+                    const metafields = await this.getProductMetafields(product.id);
+                    mappedProduct.metafields = metafields.map((mf: any) => ({
+                        id: mf.id,
+                        namespace: mf.namespace,
+                        key: mf.key,
+                        value: mf.value,
+                        type: mf.type,
+                    }));
+
+                    return mappedProduct;
                 })
             );
-            return products;
+
+            console.log(`Mapped ${mappedProducts.length} products successfully`);
+            return mappedProducts;
         } catch (error) {
-            console.error('Error fetching products from Shopify:', error);
-            throw new Error(`Failed to fetch products from Shopify: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            console.error("Error fetching products from Shopify:", error);
+            throw new Error(
+                `Failed to fetch products from Shopify: ${error instanceof Error ? error.message : "Unknown error"
+                }`
+            );
         }
     }
 
     /**
      * Get product by ID
      */
-    static async getProductById(productId: string): Promise<ShopifyProduct | null> {
+    static async getProductById(
+        productId: string
+    ): Promise<ShopifyProduct | null> {
         if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, returning null');
+            console.warn("Shopify is not configured, returning null");
             return null;
         }
 
         try {
-            const response = await shopifyClient.getProduct(productId);
-            const metafields = await getProductMetafields(productId);
-            return this.mapShopifyProduct(response.product, metafields);
+            const query = `
+                query getProduct($id: ID!) {
+                    product(id: $id) {
+                        id
+                        title
+                        handle
+                        description
+                        productType
+                        vendor
+                        tags
+                        createdAt
+                        updatedAt
+                        publishedAt
+                        availableForSale
+                        images(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    url
+                                    altText
+                                    width
+                                    height
+                                }
+                            }
+                        }
+                        variants(first: 100) {
+                            edges {
+                                node {
+                                    id
+                                    title
+                                    price {
+                                        amount
+                                        currencyCode
+                                    }
+                                    compareAtPrice {
+                                        amount
+                                        currencyCode
+                                    }
+                                    sku
+                                    availableForSale
+                                    quantityAvailable
+                                    selectedOptions {
+                                        name
+                                        value
+                                    }
+                                }
+                            }
+                        }
+                        options {
+                            id
+                            name
+                            values
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(query, {
+                id: productId.startsWith("gid://")
+                    ? productId
+                    : `gid://shopify/Product/${productId}`,
+            });
+
+            if (!data?.product) {
+                return null;
+            }
+
+            const mappedProduct = this.mapShopifyProduct(data.product);
+
+            // Fetch metafields for this product
+            const metafields = await this.getProductMetafields(data.product.id);
+            mappedProduct.metafields = metafields.map((mf: any) => ({
+                id: mf.id,
+                namespace: mf.namespace,
+                key: mf.key,
+                value: mf.value,
+                type: mf.type,
+            }));
+
+            return mappedProduct;
         } catch (error) {
-            console.error('Error fetching product from Shopify:', error);
+            console.error("Error fetching product from Shopify:", error);
             return null;
         }
     }
@@ -348,22 +408,102 @@ export class ShopifyProductService {
     /**
      * Get product by handle
      */
-    static async getProductByHandle(handle: string): Promise<ShopifyProduct | null> {
+    static async getProductByHandle(
+        handle: string
+    ): Promise<ShopifyProduct | null> {
         if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, returning null');
+            console.warn("Shopify is not configured, returning null");
             return null;
         }
 
         try {
-            const response = await shopifyClient.searchProducts(handle);
-            if (response.products.length > 0) {
-                const product = response.products[0];
-                const metafields = await getProductMetafields(product.id);
-                return this.mapShopifyProduct(product, metafields);
+            const query = `
+                query searchProducts($query: String!, $first: Int!) {
+                    products(first: $first, query: $query) {
+                        edges {
+                            node {
+                                id
+                                title
+                                handle
+                                description
+                                productType
+                                vendor
+                                tags
+                                createdAt
+                                updatedAt
+                                publishedAt
+                                availableForSale
+                                images(first: 10) {
+                                    edges {
+                                        node {
+                                            id
+                                            url
+                                            altText
+                                            width
+                                            height
+                                        }
+                                    }
+                                }
+                                variants(first: 100) {
+                                    edges {
+                                        node {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            compareAtPrice {
+                                                amount
+                                                currencyCode
+                                            }
+                                            sku
+                                            availableForSale
+                                            quantityAvailable
+                                            selectedOptions {
+                                                name
+                                                value
+                                            }
+                                        }
+                                    }
+                                }
+                                options {
+                                    id
+                                    name
+                                    values
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(query, {
+                query: `handle:${handle}`,
+                first: 1,
+            });
+
+            const products =
+                data?.products?.edges?.map((edge: any) => edge.node) || [];
+            if (products.length > 0) {
+                const product = products[0];
+                const mappedProduct = this.mapShopifyProduct(product);
+
+                // Fetch metafields for this product
+                const metafields = await this.getProductMetafields(product.id);
+                mappedProduct.metafields = metafields.map((mf: any) => ({
+                    id: mf.id,
+                    namespace: mf.namespace,
+                    key: mf.key,
+                    value: mf.value,
+                    type: mf.type,
+                }));
+
+                return mappedProduct;
             }
             return null;
         } catch (error) {
-            console.error('Error fetching product by handle from Shopify:', error);
+            console.error("Error fetching product by handle from Shopify:", error);
             return null;
         }
     }
@@ -371,33 +511,30 @@ export class ShopifyProductService {
     /**
      * Get products by product_key metafield (matching card_key from Contentstack)
      */
-    static async getProductsByProductKey(productKey: string): Promise<ShopifyProduct[]> {
+    static async getProductsByProductKey(
+        productKey: string
+    ): Promise<ShopifyProduct[]> {
         if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, returning empty products array');
+            console.warn("Shopify is not configured, returning empty products array");
             return [];
         }
 
         try {
             // Get all products and filter by metafield
-            const response = await shopifyClient.getProducts();
-            const filteredProducts = [];
-
-            for (const product of response.products) {
-                const metafields = await getProductMetafields(product.id);
-                const hasMatchingKey = metafields.some((mf: any) =>
-                    mf.namespace === 'custom' &&
-                    mf.key === 'product_key' &&
-                    mf.value === productKey
-                );
-
-                if (hasMatchingKey) {
-                    filteredProducts.push(this.mapShopifyProduct(product, metafields));
-                }
-            }
-
-            return filteredProducts;
+            const allProducts = await this.getAllProducts();
+            return allProducts.filter((product) =>
+                product.metafields.some(
+                    (mf: any) =>
+                        mf.namespace === "custom" &&
+                        mf.key === "product_key" &&
+                        mf.value === productKey
+                )
+            );
         } catch (error) {
-            console.error('Error fetching products by product key from Shopify:', error);
+            console.error(
+                "Error fetching products by product key from Shopify:",
+                error
+            );
             return [];
         }
     }
@@ -407,77 +544,794 @@ export class ShopifyProductService {
      */
     static async searchProducts(query: string): Promise<ShopifyProduct[]> {
         if (!isShopifyConfigured) {
-            console.warn('Shopify is not configured, returning empty products array');
+            console.warn("Shopify is not configured, returning empty products array");
             return [];
         }
 
         try {
-            const response = await shopifyClient.searchProducts(query);
-            const products = await Promise.all(
-                response.products.map(async (product: any) => {
-                    const metafields = await getProductMetafields(product.id);
-                    return this.mapShopifyProduct(product, metafields);
+            const searchQuery = `
+                query searchProducts($query: String!, $first: Int!) {
+                    products(first: $first, query: $query) {
+                        edges {
+                            node {
+                                id
+                                title
+                                handle
+                                description
+                                productType
+                                vendor
+                                tags
+                                createdAt
+                                updatedAt
+                                publishedAt
+                                availableForSale
+                                images(first: 10) {
+                                    edges {
+                                        node {
+                                            id
+                                            url
+                                            altText
+                                            width
+                                            height
+                                        }
+                                    }
+                                }
+                                variants(first: 100) {
+                                    edges {
+                                        node {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            compareAtPrice {
+                                                amount
+                                                currencyCode
+                                            }
+                                            sku
+                                            availableForSale
+                                            quantityAvailable
+                                            selectedOptions {
+                                                name
+                                                value
+                                            }
+                                        }
+                                    }
+                                }
+                                options {
+                                    id
+                                    name
+                                    values
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(searchQuery, {
+                query: `title:${query}`,
+                first: 50,
+            });
+
+            const products =
+                data?.products?.edges?.map((edge: any) => edge.node) || [];
+
+            return await Promise.all(
+                products.map(async (product: any) => {
+                    const mappedProduct = this.mapShopifyProduct(product);
+
+                    // Fetch metafields for this product
+                    const metafields = await this.getProductMetafields(product.id);
+                    mappedProduct.metafields = metafields.map((mf: any) => ({
+                        id: mf.id,
+                        namespace: mf.namespace,
+                        key: mf.key,
+                        value: mf.value,
+                        type: mf.type,
+                    }));
+
+                    return mappedProduct;
                 })
             );
-            return products;
         } catch (error) {
-            console.error('Error searching products in Shopify:', error);
+            console.error("Error searching products in Shopify:", error);
             return [];
         }
     }
 
     /**
-     * Map Shopify REST API product to our interface
+     * Create checkout using Storefront API
      */
-    private static mapShopifyProduct(product: any, metafields: any[] = []): ShopifyProduct {
+    static async createCheckout(
+        lineItems: Array<{ variantId: string; quantity: number }>
+    ): Promise<{
+        success: boolean;
+        checkoutUrl?: string;
+        error?: string;
+    }> {
+        if (!isShopifyConfigured) {
+            return {
+                success: false,
+                error: "Shopify is not properly configured",
+            };
+        }
+
+        try {
+            const mutation = `
+                mutation checkoutCreate($input: CheckoutCreateInput!) {
+                    checkoutCreate(input: $input) {
+                        checkout {
+                            id
+                            webUrl
+                            lineItems(first: 10) {
+                                edges {
+                                    node {
+                                        id
+                                        title
+                                        quantity
+                                        variant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                                handle
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            totalPrice {
+                                amount
+                                currencyCode
+                            }
+                            subtotalPrice {
+                                amount
+                                currencyCode
+                            }
+                            totalTax {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        checkoutUserErrors {
+                            field
+                            message
+                        }
+                    }
+                }
+            `;
+
+            const data = await shopifyGraphQLClient.query(mutation, {
+                input: {
+                    lineItems: lineItems.map((item) => ({
+                        variantId: `gid://shopify/ProductVariant/${item.variantId}`,
+                        quantity: item.quantity,
+                    })),
+                },
+            });
+
+            if (data?.checkoutCreate?.checkoutUserErrors?.length > 0) {
+                const errors = data.checkoutCreate.checkoutUserErrors;
+                return {
+                    success: false,
+                    error: errors.map((e: any) => e.message).join(", "),
+                };
+            }
+
+            const checkout = data?.checkoutCreate?.checkout;
+            if (!checkout) {
+                return {
+                    success: false,
+                    error: "Failed to create checkout",
+                };
+            }
+
+            return {
+                success: true,
+                checkoutUrl: checkout.webUrl,
+            };
+        } catch (error) {
+            console.error("Error creating checkout:", error);
+            return {
+                success: false,
+                error:
+                    error instanceof Error ? error.message : "Failed to create checkout",
+            };
+        }
+    }
+
+    /**
+     * Create a cart with line items
+     */
+    static async createCart(
+        lineItems: Array<{
+            variantId: string;
+            quantity: number;
+        }>
+    ): Promise<{
+        id: string;
+        totalQuantity: number;
+        cost: {
+            totalAmount: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        lines: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    merchandise: {
+                        id: string;
+                        title: string;
+                        price: {
+                            amount: string;
+                            currencyCode: string;
+                        };
+                        product: {
+                            id: string;
+                            title: string;
+                        };
+                    };
+                };
+            }>;
+        };
+    }> {
+        const mutation = `
+            mutation cartCreate($input: CartInput!) {
+                cartCreate(input: $input) {
+                    cart {
+                        id
+                        totalQuantity
+                        cost {
+                            totalAmount {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        lines(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    quantity
+                                    merchandise {
+                                        ... on ProductVariant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            input: {
+                lines: lineItems.map((item) => ({
+                    merchandiseId: `gid://shopify/ProductVariant/${item.variantId}`,
+                    quantity: item.quantity,
+                })),
+            },
+        };
+
+        console.log("Cart create variables:", JSON.stringify(variables, null, 2));
+        console.log("Line items being sent:", lineItems);
+
+        const response = await shopifyGraphQLClient.query(mutation, variables);
+
+        console.log("Cart create response:", JSON.stringify(response, null, 2));
+
+        if (response?.cartCreate?.userErrors?.length > 0) {
+            console.error(
+                "Cart creation user errors:",
+                response.cartCreate.userErrors
+            );
+            throw new Error(
+                `Cart creation failed: ${response.cartCreate.userErrors
+                    .map((e: any) => e.message)
+                    .join(", ")}`
+            );
+        }
+
+        const cart = response?.cartCreate?.cart;
+        console.log("Created cart:", cart);
+
+        if (!cart) {
+            console.error("No cart returned from response:", response);
+            throw new Error("Failed to create cart - no cart returned from response");
+        }
+
+        return cart;
+    }
+
+    /**
+     * Add items to an existing cart
+     */
+    static async addToCart(
+        cartId: string,
+        lineItems: Array<{
+            variantId: string;
+            quantity: number;
+        }>
+    ): Promise<{
+        id: string;
+        totalQuantity: number;
+        cost: {
+            totalAmount: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        lines: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    merchandise: {
+                        id: string;
+                        title: string;
+                        price: {
+                            amount: string;
+                            currencyCode: string;
+                        };
+                        product: {
+                            id: string;
+                            title: string;
+                        };
+                    };
+                };
+            }>;
+        };
+    }> {
+        const mutation = `
+            mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+                cartLinesAdd(cartId: $cartId, lines: $lines) {
+                    cart {
+                        id
+                        totalQuantity
+                        cost {
+                            totalAmount {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        lines(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    quantity
+                                    merchandise {
+                                        ... on ProductVariant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            cartId: `gid://shopify/Cart/${cartId}`,
+            lines: lineItems.map((item) => ({
+                merchandiseId: `gid://shopify/ProductVariant/${item.variantId}`,
+                quantity: item.quantity,
+            })),
+        };
+
+        const response = await shopifyGraphQLClient.query(mutation, variables);
+
+        console.log("Add to cart response:", JSON.stringify(response, null, 2));
+
+        if (response?.cartLinesAdd?.userErrors?.length > 0) {
+            console.error(
+                "Add to cart user errors:",
+                response.cartLinesAdd.userErrors
+            );
+            throw new Error(
+                `Add to cart failed: ${response.cartLinesAdd.userErrors
+                    .map((e: any) => e.message)
+                    .join(", ")}`
+            );
+        }
+
+        const cart = response?.cartLinesAdd?.cart;
+        console.log("Updated cart after add:", cart);
+
+        if (!cart) {
+            console.error("No cart returned from add to cart response:", response);
+            throw new Error(
+                "Failed to add items to cart - no cart returned from response"
+            );
+        }
+
+        return cart;
+    }
+
+    /**
+     * Update cart line items
+     */
+    static async updateCartLines(
+        cartId: string,
+        lineItems: Array<{
+            id: string;
+            quantity: number;
+        }>
+    ): Promise<{
+        id: string;
+        totalQuantity: number;
+        cost: {
+            totalAmount: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        lines: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    merchandise: {
+                        id: string;
+                        title: string;
+                        price: {
+                            amount: string;
+                            currencyCode: string;
+                        };
+                        product: {
+                            id: string;
+                            title: string;
+                        };
+                    };
+                };
+            }>;
+        };
+    }> {
+        const mutation = `
+            mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+                cartLinesUpdate(cartId: $cartId, lines: $lines) {
+                    cart {
+                        id
+                        totalQuantity
+                        cost {
+                            totalAmount {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        lines(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    quantity
+                                    merchandise {
+                                        ... on ProductVariant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            cartId: `gid://shopify/Cart/${cartId}`,
+            lines: lineItems.map((item) => ({
+                id: `gid://shopify/CartLine/${item.id}`,
+                quantity: item.quantity,
+            })),
+        };
+
+        const response = await shopifyGraphQLClient.query(mutation, variables);
+
+        if (response?.cartLinesUpdate?.userErrors?.length > 0) {
+            throw new Error(
+                `Update cart failed: ${response.cartLinesUpdate.userErrors
+                    .map((e: any) => e.message)
+                    .join(", ")}`
+            );
+        }
+
+        const cart = response?.cartLinesUpdate?.cart;
+        if (!cart) {
+            throw new Error("Failed to update cart");
+        }
+
+        return cart;
+    }
+
+    /**
+     * Remove items from cart
+     */
+    static async removeFromCart(
+        cartId: string,
+        lineItemIds: string[]
+    ): Promise<{
+        id: string;
+        totalQuantity: number;
+        cost: {
+            totalAmount: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        lines: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    merchandise: {
+                        id: string;
+                        title: string;
+                        price: {
+                            amount: string;
+                            currencyCode: string;
+                        };
+                        product: {
+                            id: string;
+                            title: string;
+                        };
+                    };
+                };
+            }>;
+        };
+    }> {
+        const mutation = `
+            mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+                cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+                    cart {
+                        id
+                        totalQuantity
+                        cost {
+                            totalAmount {
+                                amount
+                                currencyCode
+                            }
+                        }
+                        lines(first: 10) {
+                            edges {
+                                node {
+                                    id
+                                    quantity
+                                    merchandise {
+                                        ... on ProductVariant {
+                                            id
+                                            title
+                                            price {
+                                                amount
+                                                currencyCode
+                                            }
+                                            product {
+                                                id
+                                                title
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            cartId: `gid://shopify/Cart/${cartId}`,
+            lineIds: lineItemIds.map((id) => `gid://shopify/CartLine/${id}`),
+        };
+
+        const response = await shopifyGraphQLClient.query(mutation, variables);
+
+        if (response?.cartLinesRemove?.userErrors?.length > 0) {
+            throw new Error(
+                `Remove from cart failed: ${response.cartLinesRemove.userErrors
+                    .map((e: any) => e.message)
+                    .join(", ")}`
+            );
+        }
+
+        const cart = response?.cartLinesRemove?.cart;
+        if (!cart) {
+            throw new Error("Failed to remove items from cart");
+        }
+
+        return cart;
+    }
+
+    /**
+     * Get cart by ID
+     */
+    static async getCart(cartId: string): Promise<{
+        id: string;
+        totalQuantity: number;
+        cost: {
+            totalAmount: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        lines: {
+            edges: Array<{
+                node: {
+                    id: string;
+                    quantity: number;
+                    merchandise: {
+                        id: string;
+                        title: string;
+                        price: {
+                            amount: string;
+                            currencyCode: string;
+                        };
+                        product: {
+                            id: string;
+                            title: string;
+                        };
+                    };
+                };
+            }>;
+        };
+    } | null> {
+        const query = `
+            query getCart($id: ID!) {
+                cart(id: $id) {
+                    id
+                    totalQuantity
+                    cost {
+                        totalAmount {
+                            amount
+                            currencyCode
+                        }
+                    }
+                    lines(first: 10) {
+                        edges {
+                            node {
+                                id
+                                quantity
+                                merchandise {
+                                    ... on ProductVariant {
+                                        id
+                                        title
+                                        price {
+                                            amount
+                                            currencyCode
+                                        }
+                                        product {
+                                            id
+                                            title
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            id: `gid://shopify/Cart/${cartId}`,
+        };
+
+        const response = await shopifyGraphQLClient.query(query, variables);
+        return response?.cart || null;
+    }
+
+    /**
+     * Map Shopify Storefront API product to our interface
+     */
+    private static mapShopifyProduct(product: any): ShopifyProduct {
+        // Extract ID from GID format (gid://shopify/Product/123456)
+        const extractId = (gid: string) => {
+            if (gid.startsWith("gid://")) {
+                return gid.split("/").pop() || gid;
+            }
+            return gid;
+        };
+
         return {
-            id: product.id.toString(),
+            id: extractId(product.id),
             title: product.title,
             handle: product.handle,
-            description: product.body_html || '',
-            productType: product.product_type || '',
-            vendor: product.vendor || '',
-            tags: product.tags ? product.tags.split(',').map((tag: string) => tag.trim()) : [],
-            status: product.status.toUpperCase(),
-            createdAt: product.created_at,
-            updatedAt: product.updated_at,
-            publishedAt: product.published_at,
-            images: product.images ? product.images.map((img: any) => ({
-                id: img.id.toString(),
-                url: img.src,
-                altText: img.alt || '',
-                width: img.width || 0,
-                height: img.height || 0,
-            })) : [],
-            variants: product.variants ? product.variants.map((variant: any) => ({
-                id: variant.id.toString(),
-                productId: product.id.toString(),
-                title: variant.title,
-                price: variant.price,
-                compareAtPrice: variant.compare_at_price,
-                sku: variant.sku,
-                inventoryQuantity: variant.inventory_quantity || 0,
-                availableForSale: variant.available,
-                selectedOptions: variant.option1 ? [{
-                    name: 'Option 1',
-                    value: variant.option1
-                }] : [],
-            })) : [],
-            options: product.options ? product.options.map((option: any) => ({
-                id: option.id.toString(),
-                name: option.name,
-                values: option.values || [],
-            })) : [],
-            metafields: metafields.map((mf: any) => ({
-                id: mf.id.toString(),
-                namespace: mf.namespace,
-                key: mf.key,
-                value: mf.value,
-                type: mf.type,
-            })),
+            description: product.description || "",
+            productType: product.productType || "",
+            vendor: product.vendor || "",
+            tags: product.tags || [],
+            status: product.availableForSale ? "ACTIVE" : "DRAFT", // Use availableForSale to determine status
+            availableForSale: product.availableForSale || false,
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+            publishedAt: product.publishedAt,
+            images:
+                product.images?.edges?.map((edge: any) => ({
+                    id: extractId(edge.node.id),
+                    url: edge.node.url,
+                    altText: edge.node.altText || "",
+                    width: edge.node.width || 0,
+                    height: edge.node.height || 0,
+                })) || [],
+            variants:
+                product.variants?.edges?.map((edge: any) => ({
+                    id: extractId(edge.node.id),
+                    productId: extractId(product.id),
+                    title: edge.node.title,
+                    price: edge.node.price?.amount || "0",
+                    compareAtPrice: edge.node.compareAtPrice?.amount,
+                    sku: edge.node.sku,
+                    inventoryQuantity: edge.node.quantityAvailable || 0,
+                    availableForSale: edge.node.availableForSale,
+                    selectedOptions:
+                        edge.node.selectedOptions?.map((option: any) => ({
+                            name: option.name,
+                            value: option.value,
+                        })) || [],
+                })) || [],
+            options:
+                product.options?.map((option: any) => ({
+                    id: option.id,
+                    name: option.name,
+                    values: option.values || [],
+                })) || [],
+            metafields: [], // Will be populated separately
         };
     }
 }
 
-
-export { shopifyClient };
+export { shopifyGraphQLClient };
