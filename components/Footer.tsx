@@ -94,7 +94,7 @@ const ContactInfoBox = ({
   linkText: string;
   linkHref?: string;
 }) => (
-  <div className="flex flex-col items-start" style={{ width: '200px' }}>
+  <div className="flex flex-col items-start w-full min-w-0">
     <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mb-6">
       {icon}
     </div>
@@ -115,16 +115,16 @@ const ContactInfoBox = ({
 );
 
 const NewsletterForm = () => (
-  <div className="mb-10">
-    <div className="flex">
+  <div className="mb-8 lg:mb-10">
+    <div className="flex flex-col sm:flex-row">
       <input
         type="email"
         placeholder="Email Address"
-        className="flex-1 px-5 py-4 bg-white text-gray-900 border-0 focus:ring-2 focus:ring-amber-500 focus:outline-none rounded-l-lg"
+        className="flex-1 px-4 sm:px-5 py-3 sm:py-4 bg-white text-gray-900 border-0 focus:ring-2 focus:ring-amber-500 focus:outline-none rounded-t-lg sm:rounded-l-lg sm:rounded-t-none"
         style={{ fontSize: '16px' }}
       />
       <button 
-        className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 font-medium transition-all duration-200 hover:shadow-lg whitespace-nowrap rounded-r-lg" 
+        className="bg-amber-500 hover:bg-amber-600 text-white px-6 sm:px-8 py-3 sm:py-4 font-medium transition-all duration-200 hover:shadow-lg whitespace-nowrap rounded-b-lg sm:rounded-r-lg sm:rounded-b-none" 
         style={{ fontSize: '16px' }}
       >
         SIGN UP
@@ -158,16 +158,16 @@ const SocialMediaIcons = ({ socialMedia }: { socialMedia: FooterData['social_med
 );
 
 const NavigationSection = ({ section }: { section: NonNullable<FooterData['navigation_sections']>[0] }) => (
-  <div style={{ width: '200px' }}>
-    <h4 className="font-bold mb-8 tracking-wide" style={TEXT_STYLES.heading}>
+  <div className="w-full min-w-0 max-w-48">
+    <h4 className="font-bold mb-4 lg:mb-6 tracking-wide" style={TEXT_STYLES.heading}>
       {section.section_title.section_title}
     </h4>
-    <ul className="space-y-5 mb-0">
+    <ul className="space-y-3 lg:space-y-4 mb-0">
       {section.section_title.links?.map((link: any, linkIndex: number) => (
         <li key={linkIndex} className="mb-0">
           <a
             href={link.link.link_url}
-            className="hover:text-amber-400 transition-colors duration-200 leading-relaxed"
+            className="hover:text-amber-400 transition-colors duration-200 leading-relaxed block text-sm lg:text-base"
             style={TEXT_STYLES.primary}
           >
             {link.link.link_text}
@@ -257,51 +257,53 @@ export default function Footer() {
     <footer className="text-white" style={FOOTER_STYLES}>
       {/* Top Section - Logo and Contact Info */}
       <div className="border-b border-gray-600">
-        <div className="container mx-auto px-62 py-16">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-50">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-62 py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 lg:gap-20 xl:gap-24 items-center">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="lg:col-span-2 flex justify-center lg:justify-start w-full lg:pr-8">
               {footerData.logo && (
                 <Image
                   src={footerData.logo.url}
                   alt={footerData.logo.title || 'Logo'}
                   width={800}
                   height={240}
-                  className="h-40 w-auto"
+                  className="h-40 w-auto max-w-full lg:max-w-lg"
                 />
               )}
             </div>
 
             {/* Contact Information */}
-            <div className="flex flex-col md:flex-row gap-16 flex-1">
-              <ContactInfoBox
-                icon={locationIcon}
-                title="OUR ADDRESS"
-                content={footerData.contact_info?.address || ''}
-                linkText="GET DIRECTIONS"
-              />
-              <ContactInfoBox
-                icon={clockIcon}
-                title="TODAY'S HOURS"
-                content={footerData.contact_info?.hours || ''}
-                linkText="VIEW ALL"
-              />
-              <ContactInfoBox
-                icon={mapIcon}
-                title="PARK MAP"
-                content={footerData.contact_info?.map_description || ''}
-                linkText="VIEW MAP"
-              />
+            <div className="lg:col-span-3 lg:pl-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 lg:gap-12">
+                <ContactInfoBox
+                  icon={locationIcon}
+                  title="OUR ADDRESS"
+                  content={footerData.contact_info?.address || ''}
+                  linkText="GET DIRECTIONS"
+                />
+                <ContactInfoBox
+                  icon={clockIcon}
+                  title="TODAY'S HOURS"
+                  content={footerData.contact_info?.hours || ''}
+                  linkText="VIEW ALL"
+                />
+                <ContactInfoBox
+                  icon={mapIcon}
+                  title="PARK MAP"
+                  content={footerData.contact_info?.map_description || ''}
+                  linkText="VIEW MAP"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Footer Section */}
-      <div className="container mx-auto px-62 py-16">
-        <div className="flex flex-col lg:flex-row gap-20">
+      <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-62 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 lg:gap-20 xl:gap-24">
           {/* Newsletter Section */}
-          <div className="lg:w-1/3">
+          <div className="lg:col-span-2 lg:pr-8">
             <h3 className="font-bold mb-6" style={TEXT_STYLES.largeHeading}>
               {footerData.newsletter?.heading}
             </h3>
@@ -314,8 +316,8 @@ export default function Footer() {
           </div>
 
           {/* Navigation Sections */}
-          <div className="lg:w-2/3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-40">
+          <div className="lg:col-span-3 lg:pl-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 w-full">
               {footerData.navigation_sections?.map((section, index) => (
                 <NavigationSection key={index} section={section} />
               ))}
@@ -326,7 +328,7 @@ export default function Footer() {
 
       {/* Bottom Section */}
       <div className="bg-amber-50 text-gray-800 border-t border-gray-300">
-        <div className="container mx-auto px-62 py-12">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-62 py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
             {/* Legal Links */}
             <div className="flex flex-wrap gap-10">
