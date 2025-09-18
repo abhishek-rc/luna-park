@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useHomePageData } from '../hooks/useHomePageData';
 import { ProductMappingService } from '../services/ProductMappingService';
 import { EnhancedHomepageTicketCard } from '../typescript/layout';
 import { formatPrice, getProductImageUrl } from '../shopify-sdk/utils';
@@ -10,8 +9,24 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function TicketBookingSection() {
-    const { homepageData, loading, error } = useHomePageData();
+interface TicketBookingSectionProps {
+    data: {
+        ticket_booking_title?: string;
+        ticket_booking_tabs?: Array<{
+            tab_id: string;
+            tab_name: string;
+            ticket_booking_cards: Array<{
+                _metadata: { uid: string };
+                card_title: string;
+                card_image: { url: string };
+                card_cta: { title: string; href: string };
+                card_key: string;
+            }>;
+        }>;
+    };
+}
+
+export default function TicketBookingSection({ data }: TicketBookingSectionProps) {
     const [activeTab, setActiveTab] = useState(1);
     const [enhancedCards, setEnhancedCards] = useState<EnhancedHomepageTicketCard[]>([]);
     const [enhancementLoading, setEnhancementLoading] = useState(false);
@@ -22,11 +37,11 @@ export default function TicketBookingSection() {
     // Enhance cards with Shopify data when products are loaded
     useEffect(() => {
         const enhanceCards = async () => {
-            if (homepageData?.ticketbooking_group && products.length > 0) {
+            if (data?.ticket_booking_tabs && products.length > 0) {
                 setEnhancementLoading(true);
                 try {
-                    const allCards = homepageData.ticketbooking_group.flatMap(group => group.ticketbooking_cards || []);
-                    const enhanced = await ProductMappingService.enhanceTicketCardsWithShopifyData(allCards);
+                    const allCards = data.ticket_booking_tabs.flatMap(tab => tab.ticket_booking_cards || []);
+                    const enhanced = await ProductMappingService.enhanceTicketCardsWithShopifyData(allCards as any);
                     setEnhancedCards(enhanced);
                 } catch (error) {
                     console.error('Error enhancing cards:', error);
@@ -37,9 +52,9 @@ export default function TicketBookingSection() {
         };
 
         enhanceCards();
-    }, [homepageData, products]);
+    }, [data, products]);
 
-    if (loading || enhancementLoading) {
+    if (enhancementLoading) {
         return (
             <section className="bg-[#2a324a] py-16">
                 <div className="container mx-auto px-4 max-w-7xl">
@@ -61,21 +76,20 @@ export default function TicketBookingSection() {
         );
     }
 
-    if (error || !homepageData) {
+    if (!data) {
         return (
             <section className="bg-[#2a324a] py-16">
                 <div className="container mx-auto px-4 text-center max-w-7xl">
                     <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
                         <p className="font-bold">Error loading ticket section</p>
-                        <p>{error || 'No data available'}</p>
+                        <p>No data available</p>
                     </div>
                 </div>
             </section>
         );
     }
 
-    const { ticketbooking_group } = homepageData || {};
-    const activeTabData = ticketbooking_group?.find(tab => tab?.tab_id === activeTab);
+    const activeTabData = data.ticket_booking_tabs?.find(tab => tab?.tab_id === activeTab.toString());
 
     return (
         <section className="bg-[#305871] py-24">
@@ -83,7 +97,7 @@ export default function TicketBookingSection() {
                 {/* Section Title */}
                 <div className="text-center mb-20 relative">
                     <h2 className="text-2xl md:text-4xl font-black text-[#f9ebd1] uppercase">
-                        BOOK YOUR TICKETS ONLINE
+                        {data.ticket_booking_title || 'BOOK YOUR TICKETS ONLINE'}
                     </h2>
 
                 </div>
@@ -91,11 +105,11 @@ export default function TicketBookingSection() {
                 {/* Tab Navigation */}
                 <div className="flex justify-center mb-12">
                     <div className="flex space-x-2">
-                        {ticketbooking_group?.map((tab) => (
+                        {data.ticket_booking_tabs?.map((tab) => (
                             <button
                                 key={tab?.tab_id}
-                                onClick={() => setActiveTab(tab?.tab_id || 1)}
-                                className={`py-2 font-semibold text-sm w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === tab?.tab_id
+                                onClick={() => setActiveTab(parseInt(tab?.tab_id) || 1)}
+                                className={`py-2 font-semibold text-sm w-30 uppercase transition-all duration-200 cursor-pointer ${activeTab === parseInt(tab?.tab_id)
                                     ? 'bg-[#aa3030] text-white'
                                     : 'bg-[#f9ebd1] text-[#305871]'
                                     }`}
@@ -109,7 +123,7 @@ export default function TicketBookingSection() {
                 {/* Ticket Cards Grid */}
                 {activeTabData && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {activeTabData?.ticketbooking_cards?.map((card) => {
+                        {activeTabData?.ticket_booking_cards?.map((card) => {
                             // Find enhanced card data
                             const enhancedCard = enhancedCards.find(enhanced =>
                                 enhanced._metadata?.uid === card?._metadata?.uid
@@ -155,7 +169,7 @@ export default function TicketBookingSection() {
                 )}
 
                 {/* No cards message */}
-                {activeTabData && activeTabData?.ticketbooking_cards?.length === 0 && (
+                {activeTabData && activeTabData?.ticket_booking_cards?.length === 0 && (
                     <div className="text-center text-white py-12">
                         <p className="text-lg">No tickets available for this category.</p>
                     </div>

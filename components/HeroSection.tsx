@@ -1,17 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { useHomePageData } from '../hooks/useHomePageData';
 import Link from 'next/link';
 
-export default function HeroSection() {
-    const { homepageData, loading, error } = useHomePageData();
+interface HeroSectionProps {
+    data: {
+        hero_section: {
+            hero_cover_video: {
+                url: string;
+            };
+            hero_cta: {
+                title: string;
+                href: string;
+            };
+        };
+    };
+}
+
+export default function HeroSection({ data }: HeroSectionProps) {
     const [videoLoaded, setVideoLoaded] = useState(false);
     const [videoError, setVideoError] = useState(false);
 
-    if (loading) {
+    // Show loading state while data is being processed
+    if (!data) {
         return (
-            <section className="relative h-[60vh] bg-[#2a324a] flex items-center justify-center">
+            <section className="relative h-[90vh] bg-[#2a324a] flex items-center justify-center">
                 <div className="container mx-auto px-4">
                     <div className="animate-pulse flex flex-col items-center justify-center space-y-4">
                         <div className="h-8 bg-[#2a324a] rounded w-48"></div>
@@ -23,20 +36,7 @@ export default function HeroSection() {
         );
     }
 
-    if (error || !homepageData) {
-        return (
-            <section className="relative h-[60vh] bg-gray-900 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
-                        <p className="font-bold">Error loading hero section</p>
-                        <p>{error || 'No data available'}</p>
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
-    const { hero_section } = homepageData;
+    const { hero_section } = data;
 
     return (
         <section className="relative h-[90vh] overflow-hidden">90
@@ -62,7 +62,7 @@ export default function HeroSection() {
                         setVideoLoaded(true);
                     }}
                 >
-                    <source src={hero_section?.hero_cover?.url || ''} type="video/mp4" />
+                    <source src={hero_section?.hero_cover_video?.url || ''} type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
             </div>

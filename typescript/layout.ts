@@ -502,3 +502,27 @@ export type EnhancedHomepageTicketCard = HomepageTicketCard & {
     compareAtPrice?: string;
     inventoryQuantity?: number;
 };
+
+// Dynamic Homepage Types
+export type DynamicHomepageEntry = {
+    uid: string;
+    _version: number;
+    locale: string;
+    ACL: {};
+    _in_progress: boolean;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string;
+    title: string;
+    tags: any[];
+    modular_blocks: Array<{
+        [key: string]: any;
+    }>;
+    publish_details: {
+        time: string;
+        user: string;
+        environment: string;
+        locale: string;
+    };
+};

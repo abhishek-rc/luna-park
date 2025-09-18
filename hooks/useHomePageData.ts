@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { getContentByType } from '../helper';
-import { HomepageEntry } from '../typescript/layout';
+import { DynamicHomepageEntry } from '../typescript/layout';
 
 export function useHomePageData() {
-    const [homepageData, setHomepageData] = useState<HomepageEntry | null>(null);
+    const [homepageData, setHomepageData] = useState<DynamicHomepageEntry | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +14,7 @@ export function useHomePageData() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await getContentByType('homepage_ticketbooking_navigation_tabs');
+                const response = await getContentByType('dynamic_homepage');
                 if (response && response.length > 0) {
                     setHomepageData(response[0]);
                 }
